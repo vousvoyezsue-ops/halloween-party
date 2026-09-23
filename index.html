@@ -43,21 +43,22 @@ button,input,textarea{font:inherit;color:inherit}
 /* ---------- hero / stage ---------- */
 .hero{position:relative;z-index:1;min-height:100svh;display:grid;place-items:center;padding-inline:16px;padding-block:max(28px, env(safe-area-inset-top)) 40px}
 .stage{
-  --w:min(540px, calc(100vw - 68px), calc((100svh - 110px) / 1.36));
-  --h:calc(var(--w) * .92);
+  --pad:18px; --ratio:.92;
+  --w:min(540px, calc(100vw - 32px - var(--pad) * 2), calc((100svh - 110px) / 1.36));
+  --h:calc(var(--w) * var(--ratio));
   --floor:72deg;
-  position:relative;width:calc(var(--w) + 36px);height:calc(var(--h) * 1.45 + 40px);
+  position:relative;width:calc(var(--w) + var(--pad) * 2);height:calc(var(--h) * 1.45 + 40px);
 }
 .hello{position:absolute;left:0;right:0;top:0;height:calc(var(--h) * .45);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;transition:opacity .5s, transform .5s}
 .hello p{margin:0}
 .hello-a{font-family:var(--hand);font-size:calc(var(--w) * .1);line-height:.9;color:var(--mocha-d);background:var(--speck),var(--cream);padding:.08em .35em .18em;box-shadow:0 6px 14px -6px #1c151899;transform:rotate(-3deg);text-shadow:0 1px 0 #2f2a2e40}
-.hello-b{margin-top:8px!important;font-size:calc(var(--w) * .032);letter-spacing:.16em;text-transform:uppercase;color:var(--cream);background:#2f2a2e8c;padding:4px 10px;border-radius:2px}
+.hello-b{margin-top:8px!important;font-size:max(11px, calc(var(--w) * .032));letter-spacing:.16em;text-transform:uppercase;color:var(--cream);background:#2f2a2e8c;padding:4px 10px;border-radius:2px}
 .hello-b svg{width:.9em;vertical-align:-.1em;animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{50%{transform:translateY(3px)}}
 .is-opening .hello{opacity:0;transform:translateY(-10px)}
 
 /* envelope */
-.env{position:absolute;left:0;top:calc(var(--h) * .45 + 2px);width:calc(var(--w) + 36px);height:calc(var(--h) + 36px);
+.env{position:absolute;left:0;top:calc(var(--h) * .45 + 20px - var(--pad));width:calc(var(--w) + var(--pad) * 2);height:calc(var(--h) + var(--pad) * 2);
   transition:transform .9s cubic-bezier(.5,0,.3,1), opacity .7s}
 .is-open .env{transform:translateY(calc(var(--h) * .9)) rotate(-5deg);opacity:0;pointer-events:none}
 .env-back{z-index:1;border-radius:4px;box-shadow:0 26px 50px -18px #1c1518cc;
@@ -88,7 +89,7 @@ button,input,textarea{font:inherit;color:inherit}
 .is-opening .seal{animation:none;transform:translateY(-40px) rotate(-60deg) scale(.4);opacity:0;pointer-events:none}
 
 /* card */
-.card-wrap{position:absolute;left:18px;top:20px;width:var(--w);height:calc(var(--h) * 2);perspective:1400px;perspective-origin:50% 40%;
+.card-wrap{position:absolute;left:var(--pad);top:20px;width:var(--w);height:calc(var(--h) * 2);perspective:1400px;perspective-origin:50% 40%;
   z-index:2;pointer-events:none;transform:translateY(calc(var(--h) * -.55));transition:transform 1s cubic-bezier(.4,0,.2,1)}
 .is-out .card-wrap{transform:translateY(calc(var(--h) * -1.17))}
 .is-open .card-wrap{transform:translateY(0);z-index:6;pointer-events:auto;transition-duration:1.3s}
@@ -128,9 +129,9 @@ button,input,textarea{font:inherit;color:inherit}
 .words{position:absolute;left:14%;right:14%;top:30%;height:48%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .words p,.words h1{margin:0}
 .kicker{font-family:var(--hand);font-size:calc(var(--w) * .07);line-height:.8;color:var(--mocha)}
-.hosts{font-size:calc(var(--w) * .03);letter-spacing:.3em;text-transform:uppercase;margin-top:calc(var(--w) * .015)!important}
+.hosts{font-size:max(10px, calc(var(--w) * .03));letter-spacing:.3em;text-transform:uppercase;margin-top:calc(var(--w) * .015)!important}
 .words h1{font-family:var(--serif);font-style:italic;font-weight:300;font-size:calc(var(--w) * .1);line-height:1;letter-spacing:-.01em;color:var(--ink);text-wrap:balance}
-.details{font-size:calc(var(--w) * .03);line-height:1.55;letter-spacing:.08em;margin-top:calc(var(--w) * .02)!important}
+.details{font-size:max(10.5px, calc(var(--w) * .03));line-height:1.55;letter-spacing:.08em;margin-top:calc(var(--w) * .02)!important}
 .rsvpby{font-family:var(--hand);font-size:calc(var(--w) * .058);line-height:.9;color:var(--red);transform:rotate(-2deg)}
 
 .pop{position:absolute;transform-origin:50% 100%;transform:translateZ(1px) rotateX(0deg);transition:transform .45s ease-in;
@@ -238,6 +239,34 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .msgs{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-direction:column;gap:12px}
 .msgs li{background:#ffffff77;padding:14px 16px;border-radius:2px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .msgs small{display:block;margin-top:6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+
+/* ---------- phones ---------- */
+@supports not (height:100svh){ .stage{--w:min(540px, calc(100vw - 32px - var(--pad) * 2), calc((100vh - 110px) / 1.36))} .hero{min-height:100vh} }
+@media (max-width:560px){
+  .hero{padding-inline:12px}
+  .stage{--pad:8px; --ratio:1; --w:min(540px, calc(100vw - 24px - var(--pad) * 2), calc((100svh - 120px) / 1.47))}
+  .words{left:8%;right:8%}
+  .kicker{font-size:calc(var(--w) * .075)}
+  .words h1{font-size:calc(var(--w) * .105)}
+  .rsvpby{font-size:calc(var(--w) * .065)}
+  .after{padding-inline:12px}
+  .patch{padding:26px 20px}
+  .art-patch{min-height:120px}
+  .p-sub{font-size:12px;letter-spacing:.1em}
+  .chips{gap:6px}
+  .chip span{padding:10px 14px}
+  .btn{width:100%;justify-content:center;padding:14px 22px}
+  .theme{padding:12px}
+  .music{padding:7px 12px 7px 9px}
+  .music #musicLabel{font-size:11px}
+}
+.cue{position:absolute;left:50%;bottom:max(14px, env(safe-area-inset-bottom));z-index:3;translate:-50% 0;display:none;align-items:center;gap:6px;
+  background:var(--speck),var(--cream);color:var(--ink);border:0;border-radius:999px;padding:9px 16px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;
+  box-shadow:0 6px 16px -6px #1c1518aa;white-space:nowrap}
+.cue svg{width:12px;animation:nudge 1.6s ease-in-out infinite}
+.opened .cue{display:inline-flex;animation:rise .8s ease 2.4s both}
+.cue.gone{opacity:0;pointer-events:none;transition:opacity .4s}
+@media (max-height:600px){.cue{display:none!important}}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:25}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition-duration:.01s!important;transition-delay:0s!important}}
 </style>
@@ -299,15 +328,16 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
     <div class="env flapbox" aria-hidden="true"><div class="flap"><div class="flap-face out"></div><div class="flap-face in"></div></div></div>
     <div class="env sealbox"><button class="seal" id="seal" aria-label="Open the invitation"></button></div>
   </div>
+  <button class="cue" id="cue">RSVP &amp; vote below <svg viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 1v9M1.5 6.5 5 10l3.5-3.5"/></svg></button>
 </section>
 
 <section class="after" id="after" aria-label="RSVP, costume vote and notes">
   <div class="quilt2">
     <div class="patch paper" style="--c:var(--cream);grid-area:rsvp" id="rsvpPatch">
       <h2 class="p-title">will you come?</h2>
-      <p class="p-sub">kindly reply by september 30 · <span id="sleeps"></span></p>
+      <p class="p-sub">kindly reply by September 30 · <span id="sleeps"></span></p>
       <form id="rsvpForm" novalidate>
-        <div class="field"><label for="rsvpName">your name</label><input class="in" id="rsvpName" name="name" maxlength="40" autocomplete="name" placeholder="e.g. Minji" required></div>
+        <div class="field"><label for="rsvpName">your name</label><input class="in" id="rsvpName" name="name" maxlength="40" autocomplete="name" placeholder="e.g. Minji Kim" required></div>
         <fieldset>
           <legend class="legend">are you coming?</legend>
           <div class="chips">
@@ -349,7 +379,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
     </div>
     <div class="patch foot paper" style="--c:var(--greige);grid-area:foot">
       <p class="p-title">see you on the 31st</p>
-      <p class="p-sub">saturday · 6 pm · at Sue &amp; Sian's place</p>
+      <p class="p-sub">Saturday · 6 PM · at Sue &amp; Sian's place</p>
       <div class="foot-links"><button class="linkish" id="foldBack">fold the letter back up</button><button class="linkish" id="hostLink">for hosts</button></div>
     </div>
   </div>
@@ -479,9 +509,9 @@ front.insertAdjacentHTML('beforeend', `
     <div class="words">
       <p class="kicker">you're invited to</p>
       <p class="hosts">Sue &amp; Sian's</p>
-      <h1>halloween party</h1>
-      <p class="details">saturday, october 31 · 6 pm<br>at Sue &amp; Sian's place</p>
-      <p class="rsvpby">rsvp by sept 30</p>
+      <h1>Halloween Party</h1>
+      <p class="details">Saturday, October 31 · 6 PM<br>at Sue &amp; Sian's place</p>
+      <p class="rsvpby">RSVP by Sept 30</p>
     </div>
   </div>
   <div class="lift" style="--z:22px;--ld:1.35s">
@@ -546,6 +576,8 @@ function closeCard(){
   T(() => { stage.classList.remove('is-opening'); busy = false; $('#seal').focus({preventScroll:true}); }, 2700);
 }
 $('#seal').addEventListener('click', openCard);
+$('#cue').addEventListener('click', () => $('#rsvpPatch').scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'start'}));
+addEventListener('scroll', () => $('#cue').classList.toggle('gone', scrollY > 80), {passive:true});
 $('#pocket').addEventListener('click', openCard);
 $('#foldBack').addEventListener('click', () => { scrollTo({top:0, behavior: reduce ? 'auto' : 'smooth'}); T(closeCard, 500); });
 $('#moon').addEventListener('click', () => { const b = $('#bats'); b.classList.remove('fly'); void b.offsetWidth; b.classList.add('fly'); chime(91); setTimeout(() => b.classList.remove('fly'), 2400); });
@@ -553,9 +585,11 @@ $('#moon').addEventListener('click', () => { const b = $('#bats'); b.classList.r
 if (!reduce) {
   let tx = 0, ty = 0, cx = 0, cy = 0, last = -1e9;
   addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { tx = e.clientX / innerWidth - .5; ty = e.clientY / innerHeight - .5; last = performance.now(); } });
+  const coarse = matchMedia('(pointer: coarse)').matches;
   (function frame(t){
+    if (!stage.classList.contains('is-open') || scrollY > innerHeight) { requestAnimationFrame(frame); return; }
     let gx = tx, gy = ty;
-    if (t - last > 2500) { gx = Math.sin(t / 2300) * .28; gy = Math.cos(t / 3100) * .16; }
+    if (t - last > 2500) { const k = coarse ? .6 : 1; gx = Math.sin(t / 2300) * .28 * k; gy = Math.cos(t / 3100) * .16 * k; }
     cx += (gx - cx) * .05; cy += (gy - cy) * .05;
     card.style.setProperty('--ry', (cx * 16).toFixed(2) + 'deg');
     card.style.setProperty('--rx', (-cy * 9).toFixed(2) + 'deg');
@@ -677,10 +711,10 @@ const say = (el, msg, err) => { el.textContent = msg; el.classList.toggle('err',
 /* themes */
 const THEMES = [
   ['disney','Disney','princesses, villains & sidekicks', 'castle'],
-  ['90s','Back to the 90s','slip dresses, tamagotchis & frosted tips', 'cassette'],
+  ['90s','Back to the 90s','slip dresses, Tamagotchis & frosted tips', 'cassette'],
   ['games','Game characters','pixel heroes, plumbers & trainers', 'controller'],
-  ['monsters','Classic monsters','vampires, mummies & friendly frankensteins', 'fangs'],
-  ['storybook','Storybook & fairytale','red riding hood, the big bad wolf, alice', 'book'],
+  ['monsters','Classic monsters','vampires, mummies & friendly Frankensteins', 'fangs'],
+  ['storybook','Storybook & fairytale','Little Red Riding Hood, the Big Bad Wolf, Alice', 'book'],
 ];
 $('#themes').innerHTML = THEMES.map(([id, name, sub, icon]) => `<label class="theme" for="th-${id}"><input type="checkbox" id="th-${id}" value="${id}">${A[icon]()}<b>${name}</b><small>${sub}</small><span class="n" id="n-${id}"></span><span class="bar" id="bar-${id}"></span></label>`).join('');
 
