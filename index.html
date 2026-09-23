@@ -350,7 +350,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
         <span class="status" id="rsvpStatus" role="status"></span>
       </form>
       <div class="guests">
-        <div class="g-head"><span><b id="nYes">0</b> coming</span><span><b id="nMaybe">0</b> maybe</span><span><b id="nNo">0</b> can't</span></div>
+        <div class="g-head"><span><b id="nYes">0</b> coming so far</span></div>
         <div class="tags" id="guestTags"></div>
       </div>
     </div>
@@ -390,10 +390,10 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
     <h2 class="p-title" id="hostTitle">hosts only</h2>
     <form id="hostForm" novalidate>
       <div class="field"><label for="hostKey">passcode</label><input class="in" id="hostKey" type="password" autocomplete="off"></div>
-      <button class="btn" type="submit">open notes</button>
+      <button class="btn" type="submit">open guest list &amp; notes</button>
       <span class="status" id="hostStatus" role="status"></span>
     </form>
-    <ul class="msgs" id="msgs"></ul>
+    <div id="hostGuests"></div><ul class="msgs" id="msgs"></ul>
     <div class="foot-links"><button class="linkish" id="hostClose">close</button></div>
   </div>
 </div>
@@ -731,16 +731,16 @@ if ((mine.votes || []).length) $('#voteBtn').textContent = 'update my vote';
 
 function renderBoard(b){
   const g = b.guests || [];
-  const yes = g.filter(x => x.status === 'yes'), maybe = g.filter(x => x.status === 'maybe'), no = g.filter(x => x.status === 'no');
-  $('#nYes').textContent = yes.length; $('#nMaybe').textContent = maybe.length; $('#nNo').textContent = no.length;
+  const yes = g.filter(x => x.status === 'yes');
+  $('#nYes').textContent = yes.length;
   const tags = $('#guestTags'); tags.textContent = '';
   const tint = ['#e8dc93','#e7aaa6','#aebfd3','#c4b6d8','#cfc5bf','#b9c29a'];
-  [...yes, ...maybe].forEach((x, i) => {
-    const s = document.createElement('span'); s.textContent = x.name + (x.status === 'maybe' ? ' ?' : '');
-    if (x.status === 'maybe') s.className = 'maybe'; else s.style.setProperty('--c2', tint[i % tint.length]);
+  yes.forEach((x, i) => {
+    const s = document.createElement('span'); s.textContent = x.name;
+    s.style.setProperty('--c2', tint[i % tint.length]);
     s.style.setProperty('--r', ((i * 37 % 7) - 3) + 'deg'); tags.appendChild(s);
   });
-  if (!yes.length && !maybe.length) tags.innerHTML = '<p class="empty">no names yet, be the first ghost on the list</p>';
+  if (!yes.length) tags.innerHTML = '<p class="empty">no names yet, be the first ghost on the list</p>';
   const tally = b.tally || {}, voters = b.voters || 0;
   const max = Math.max(1, ...THEMES.map(([id]) => tally[id] || 0));
   THEMES.forEach(([id]) => { const n = tally[id] || 0; $('#n-' + id).textContent = n ? n + (n === 1 ? ' vote' : ' votes') : ''; $('#bar-' + id).style.setProperty('--p', (n / max * 100) + '%'); });
@@ -761,7 +761,7 @@ $('#rsvpForm').addEventListener('submit', async e => {
   try {
     await rpc('submit_rsvp', {p_token: token, p_name: name, p_status: st.value});
     store.set('hp-mine', Object.assign(store.get('hp-mine') || {}, {name, status: st.value}));
-    say(out, st.value === 'yes' ? 'yay! you\'re on the list ♡' : st.value === 'maybe' ? 'noted as maybe, update anytime' : 'we\'ll miss you! thanks for telling us');
+    say(out, st.value === 'yes' ? 'yay! you\'re on the list ♡' : st.value === 'maybe' ? 'noted as maybe, only Sue & Sian can see this' : 'we\'ll miss you! only Sue & Sian can see this');
     btn.textContent = 'update my RSVP';
     if (st.value === 'yes') { burst(60); chime(88); }
     loadBoard();
@@ -808,9 +808,18 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && !host.hidden) close
 if (location.hash === '#host') openHost();
 $('#hostForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const out = $('#hostStatus'), list = $('#msgs'); say(out, 'opening…'); list.textContent = '';
+  const out = $('#hostStatus'), list = $('#msgs'), hg = $('#hostGuests'); say(out, 'opening…'); list.textContent = ''; hg.textContent = '';
   try {
-    const msgs = await rpc('host_messages', {p_key: $('#hostKey').value});
+    const key = $('#hostKey').value;
+    const [msgs, all] = await Promise.all([rpc('host_messages', {p_key: key}), rpc('host_guests', {p_key: key})]);
+    [['yes','coming'],['maybe','maybe'],['no',"can't make it"]].forEach(([st, label]) => {
+      const who = all.filter(x => x.status === st);
+      const box = document.createElement('div'); box.className = 'guests';
+      const h = document.createElement('div'); h.className = 'g-head'; h.innerHTML = `<span><b></b> ${label}</span>`; h.querySelector('b').textContent = who.length;
+      const tags = document.createElement('div'); tags.className = 'tags';
+      who.forEach(x => { const t = document.createElement('span'); t.textContent = x.name; if (st !== 'yes') t.className = 'maybe'; tags.appendChild(t); });
+      box.append(h, tags); hg.appendChild(box);
+    });
     say(out, msgs.length ? `${msgs.length} ${msgs.length === 1 ? 'note' : 'notes'} for you ♡` : 'no notes yet');
     msgs.forEach(m => { const li = document.createElement('li'); li.textContent = m.body; const s = document.createElement('small'); s.textContent = (m.name || 'a mystery guest') + ' · ' + new Date(m.at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}); li.appendChild(s); list.appendChild(li); });
   } catch (err) { say(out, err.code === '28P01' ? 'that passcode isn\'t right' : 'couldn\'t load, try again', true); }
