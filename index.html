@@ -107,7 +107,7 @@ button,input,textarea{font:inherit;color:inherit}
 .back{transform:rotateX(180deg) translateZ(3px);background:var(--dspeck), var(--speck), var(--rose);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:calc(var(--h) * .08);gap:4px;color:var(--mocha-d)}
 .back .om{font-family:var(--hand);font-size:calc(var(--w) * .13);line-height:.8;transform:rotate(-4deg)}
 .back .al{font-size:calc(var(--w) * .03);letter-spacing:.2em;text-transform:uppercase}
-.back svg{width:calc(var(--w) * .2)}
+.back svg{width:calc(var(--w) * .3);margin-top:calc(var(--h) * .04)}
 
 .lift{position:absolute;inset:0;pointer-events:none;backface-visibility:hidden;-webkit-backface-visibility:hidden;
   transform:translateZ(calc(var(--z) * .04));transition:transform .5s ease}
@@ -301,7 +301,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
   <div class="stage" id="stage">
     <div class="hello">
       <p class="hello-a">a little letter for you</p>
-      <p class="hello-b">tap the flower seal <svg viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 1v9M1.5 6.5 5 10l3.5-3.5"/></svg></p>
+      <p class="hello-b">tap the kitty seal <svg viewBox="0 0 10 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 1v9M1.5 6.5 5 10l3.5-3.5"/></svg></p>
     </div>
     <div class="env env-back" aria-hidden="true"></div>
 
@@ -432,7 +432,14 @@ const A = {
       <circle cx="50" cy="40" r="4" fill="${C.butter}"/><path d="M50 40 41 29M50 40l9-12M50 40V25" stroke="#6b5a3a" stroke-width="1.2"/>
       <circle cx="41" cy="29" r="2.4" fill="${C.red}"/><circle cx="59" cy="28" r="2.4" fill="${C.red}"/><circle cx="50" cy="25" r="2.4" fill="${C.red}"/>`);
   },
-  flower: () => wrap('0 0 100 100', `<g fill="${C.cream}"><circle cx="50" cy="27" r="24"/><circle cx="73" cy="50" r="24"/><circle cx="50" cy="73" r="24"/><circle cx="27" cy="50" r="24"/></g>
+  kitty: () => wrap('0 0 100 100', `<path d="M50 3C58 3 62 9 70 9S84 14 87 22 95 34 96 44 92 58 95 66 88 80 80 86 68 95 58 96 46 99 38 96 22 92 16 84 5 72 4 62 8 50 5 40 10 24 18 16 30 6 40 5 42 3 50 3Z" fill="#c47a50"/>
+    <circle cx="50" cy="52" r="36" fill="#d58a5a"/>
+    <path d="M27 50 29 22l17 16ZM73 50 71 22 54 38Z" fill="${C.ink}"/><path d="M31 42l1-12 8 8ZM69 42l-1-12-8 8Z" fill="${C.blush}"/>
+    <ellipse cx="50" cy="58" rx="27" ry="23" fill="${C.ink}"/>
+    <ellipse cx="40" cy="55" rx="4.4" ry="5.4" fill="${C.butter}"/><ellipse cx="60" cy="55" rx="4.4" ry="5.4" fill="${C.butter}"/>
+    <ellipse cx="40" cy="55.6" rx="1.6" ry="3.8" fill="${C.ink}"/><ellipse cx="60" cy="55.6" rx="1.6" ry="3.8" fill="${C.ink}"/>
+    <path d="M47.5 63h5l-2.5 3Z" fill="${C.blush}"/><ellipse cx="34" cy="65" rx="4" ry="2.2" fill="${C.blush}" opacity=".8"/><ellipse cx="66" cy="65" rx="4" ry="2.2" fill="${C.blush}" opacity=".8"/>
+    <path d="M22 62h10M22 67l10-2M78 62H68M78 67l-10-2" stroke="${C.cream}" stroke-width="1.2" stroke-linecap="round"/>`),
     <g fill="${C.blush}"><circle cx="50" cy="28" r="19"/><circle cx="72" cy="50" r="19"/><circle cx="50" cy="72" r="19"/><circle cx="28" cy="50" r="19"/><circle cx="50" cy="50" r="18"/></g><circle cx="50" cy="50" r="7" fill="${C.red}"/>`),
   moth: () => {
     const wing = `<path d="M58 45C40 10 10 8 8 30 6 46 30 50 34 48 14 56 18 82 36 80 50 78 56 60 58 45Z" fill="${C.cream}"/><circle cx="24" cy="26" r="2.2" fill="${C.ink}"/><circle cx="36" cy="34" r="2" fill="${C.ink}"/><circle cx="18" cy="38" r="1.8" fill="${C.ink}"/><circle cx="30" cy="64" r="2" fill="${C.ink}"/><circle cx="40" cy="70" r="1.8" fill="${C.ink}"/><circle cx="44" cy="22" r="1.6" fill="${C.ink}"/>`;
@@ -463,7 +470,7 @@ const A = {
 const tiles = [
   {c:'#8f93c2', art:[['moon',.34,.14,.18],['sparkle',.14,.62,.62],['sparkle',.1,.2,.6],['bat',.3,.55,.4]]},
   {c:'#6b5550', art:[['ghost',.34,.3,.4],['plant',.12,.1,.62],['bloom',.08,.78,.2]]},
-  {c:'#cfc5bf', art:[['flower',.4,.3,.3],['sparkle',.16,.74,.14]]},
+  {c:'#cfc5bf', art:[['ghostPlaid',.3,.34,.24],['sparkle',.16,.74,.14]]},
   {c:'#2f2a2e', art:[['lily',.34,.33,.2]]},
   {c:'#aebfd3', art:[['ghostPlaid',.38,.3,.28],['bloom',.1,.12,.7]]},
   {c:'#c4b6d8', art:[['candle',.22,.4,.22]]},
@@ -472,7 +479,7 @@ const tiles = [
   {c:'#58453f', art:[['lamb',.46,.26,.34],['plant',.1,.78,.6]]},
   {c:'#8f93c2', art:[['bat',.3,.3,.3],['bat',.2,.6,.6],['sparkle',.1,.2,.7]]},
   {c:'#2f2a2e', art:[['cat',.46,.26,.34],['sparkle',.1,.8,.2]]},
-  {c:'#e9e1d6', art:[['flower',.28,.5,.24],['bloom',.12,.2,.6]]},
+  {c:'#e9e1d6', art:[['pumpkin',.3,.44,.3],['bloom',.12,.2,.6]]},
   {c:'#aebfd3', art:[['moon',.26,.6,.2],['sparkle',.12,.2,.4]]},
   {c:'#6b5550', art:[['ghost',.26,.24,.34],['ghost',.2,.6,.52]]},
   {c:'#c4b6d8', art:[['moth',.4,.3,.3]]},
@@ -484,14 +491,14 @@ function placeArt(el, list){
 const quilt = $('#quilt');
 tiles.forEach(t => { const d = document.createElement('div'); d.className = 'tile'; d.style.setProperty('--c', t.c); placeArt(d, t.art); quilt.appendChild(d); });
 document.querySelectorAll('[data-art]').forEach(p => {
-  const sets = {lily:[['lily',.3,.36,.1],['sparkle',.08,.14,.2],['sparkle',.06,.78,.7]], ghosts:[['ghost',.26,.16,.2],['ghostPlaid',.24,.56,.36],['plant',.08,.84,.12]], night:[['moon',.14,.1,.14],['bat',.2,.46,.3],['bat',.12,.7,.5],['sparkle',.05,.3,.6],['flower',.14,.76,.14]]};
+  const sets = {lily:[['lily',.3,.36,.1],['sparkle',.08,.14,.2],['sparkle',.06,.78,.7]], ghosts:[['ghost',.26,.16,.2],['ghostPlaid',.24,.56,.36],['plant',.08,.84,.12]], night:[['moon',.14,.1,.14],['bat',.2,.46,.3],['bat',.12,.7,.5],['sparkle',.05,.3,.6],['sparkle',.08,.8,.16]]};
   placeArt(p, sets[p.dataset.art]);
 });
 
 /* ================= envelope + card art ================= */
-$('#seal').innerHTML = A.flower();
+$('#seal').innerHTML = A.kitty();
 $('#stamp').innerHTML = A.ghost();
-$('#cover').innerHTML = `<span class="om">open me</span><span class="al">a little letter</span>${A.flower()}`;
+$('#cover').innerHTML = `<span class="om">open me</span><span class="al">a little letter</span>${A.cat()}`;
 
 const front = $('#front');
 front.insertAdjacentHTML('beforeend', `
@@ -515,7 +522,7 @@ front.insertAdjacentHTML('beforeend', `
     </div>
   </div>
   <div class="lift" style="--z:22px;--ld:1.35s">
-    <span class="art" style="right:2%;top:21%;width:calc(var(--w)*.17)">${A.flower()}</span>
+    <span class="art floaty" style="right:3%;top:19%;width:calc(var(--w)*.12)">${A.ghost()}</span>
     <span class="art" style="left:2%;top:58%;width:calc(var(--w)*.15)">${A.moth()}</span>
   </div>
   <div class="lift" style="--z:12px;--ld:1.4s">
