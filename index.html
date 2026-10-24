@@ -27,13 +27,13 @@
 *{box-sizing:border-box}
 html{background:var(--mocha);color-scheme:light}
 html,body{overflow-x:clip}
-body{margin:0;font-family:var(--type);font-size:16px;line-height:1.55;color:var(--ink);background:var(--mocha);-webkit-font-smoothing:antialiased}
+body{margin:0;background-image:var(--dspeck);font-family:var(--type);font-size:16px;line-height:1.55;color:var(--ink);background:var(--mocha);-webkit-font-smoothing:antialiased}
 .chalk{background-image:var(--speck),var(--streak)}
 button,input,textarea{font:inherit;color:inherit}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ---------- patchwork backdrop ---------- */
-.quilt{position:fixed;inset:0;display:grid;z-index:0;
+.quilt{display:none;
   grid-template-columns:1.3fr 1fr 1.2fr;grid-template-rows:1fr 1.3fr .9fr 1.2fr 1fr}
 @media (min-width:760px){.quilt{grid-template-columns:1.2fr 1fr 1.4fr .9fr 1.1fr;grid-template-rows:1fr 1.25fr .95fr}}
 .tile{position:relative;overflow:hidden;background-image:var(--speck),var(--streak);background-color:var(--c)}
@@ -41,17 +41,17 @@ button,input,textarea{font:inherit;color:inherit}
 .quilt::after{content:"";position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 45%,#2f2a2e38,transparent 75%)}
 
 /* ---------- header ---------- */
-.top{position:relative;z-index:1;padding:calc(max(16px, env(safe-area-inset-top)) + 52px) 16px 0}
-.ic{max-width:980px;margin:0 auto;box-shadow:0 30px 60px -20px #1c1518cc}
+.top{position:relative;z-index:1;padding:max(20px, env(safe-area-inset-top)) 16px 0}
+.ic{position:relative;max-width:640px;margin:0 auto}
 .ic-sky,.ic-ground{position:relative;overflow:hidden;background-image:var(--speck),var(--streak)}
-.ic-sky{height:clamp(120px,20vw,180px);background-color:var(--peri)}
-.ic-ground{height:clamp(96px,14vw,130px);background-color:var(--char)}
+.ic-sky{height:clamp(96px,22vw,130px);background-color:var(--peri)}
+.ic-ground{height:clamp(80px,18vw,104px);background-color:var(--char)}
 .ic-sky svg,.ic-ground svg{position:absolute;display:block}
-.ic-paper{background:var(--dspeck),var(--speck),var(--cream);text-align:center;padding:clamp(34px,6vw,56px) 20px}
+.ic-paper{background:var(--dspeck),var(--speck),var(--cream);text-align:center;padding:clamp(26px,5vw,40px) 20px}
 .ic-paper p{margin:0}
 .kicker{font-family:var(--hand);font-size:clamp(36px,6vw,48px);line-height:.8;color:var(--mocha)}
 .hosts{font-size:13px;letter-spacing:.3em;text-transform:uppercase;margin-top:16px!important}
-.ic-paper h1{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(48px,9vw,84px);line-height:1;letter-spacing:-.01em;margin:6px 0 0;text-wrap:balance}
+.ic-paper h1{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(44px,11vw,68px);line-height:1;letter-spacing:-.01em;margin:6px 0 0;text-wrap:balance}
 .details{font-size:17px;line-height:1.6;margin-top:14px!important}
 .floaty{animation:float 3.2s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-5px)}}
@@ -64,11 +64,8 @@ button,input,textarea{font:inherit;color:inherit}
 
 /* ---------- after: patchwork sections ---------- */
 .after{position:relative;z-index:1;padding-inline:16px;padding-block:0 56px}
-.quilt2{max-width:980px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;
-  grid-template-areas:"rsvp rsvp" "a1 a2" "vote vote" "a3 a3" "note note" "time time" "foot foot";
-  box-shadow:0 30px 60px -20px #1c1518cc}
-@media (min-width:760px){.quilt2{grid-template-columns:repeat(6,1fr);
-  grid-template-areas:"rsvp rsvp rsvp rsvp a1 a1" "a2 a2 vote vote vote vote" "note note note note a3 a3" "time time time time time time" "foot foot foot foot foot foot"}}
+.quilt2{max-width:640px;margin:0 auto;box-shadow:0 30px 60px -20px #1c1518cc}
+.art-patch{display:none}
 .patch{position:relative;background-image:var(--speck),var(--streak);background-color:var(--c);padding:clamp(24px,5vw,40px);min-width:0}
 .patch.paper{background-image:var(--dspeck),var(--speck)}
 .art-patch{min-height:150px;overflow:hidden}
@@ -122,15 +119,20 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .linkish:hover{opacity:1}
 .foot-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:18px}
 
+/* ---------- tabs ---------- */
+.tabs{position:sticky;top:0;z-index:20;width:min(640px, calc(100% - 32px));margin:0 auto;display:flex;justify-content:safe center;gap:2px;overflow-x:auto;scrollbar-width:none;
+  padding:0 8px;background:var(--dspeck),var(--speck),var(--cream);border-top:1.5px dashed #2f2a2e33;box-shadow:0 10px 18px -14px #1c1518aa}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto;border:0;background:none;padding:14px 12px 10px;font-family:var(--hand);font-size:29px;line-height:1;color:var(--ink);opacity:.6;cursor:pointer;
+  border-bottom:3px solid transparent;transition:opacity .2s, border-color .2s}
+.tabs button:hover{opacity:.8}
+.tabs button[aria-selected="true"]{opacity:1;border-bottom-color:var(--ink)}
+.patch[hidden]{display:none}
+
 /* ---------- party night ---------- */
-.quilt2.night{display:none;grid-template-areas:"time time" "fort fort" "n1 n2" "myst myst" "spin spin" "liar liar" "award award" "n3 n3" "songs songs" "album album" "foot foot"}
-@media (min-width:760px){.quilt2.night{grid-template-areas:"time time time fort fort fort" "myst myst myst myst n1 n1" "spin spin spin liar liar liar" "n2 n2 award award award award" "songs songs songs songs n3 n3" "album album album album album album" "foot foot foot foot foot foot"}}
-.phase-party .quilt2.night,.phase-album .quilt2.night{display:grid}
+.quilt2.night{display:none}
+.phase-party .quilt2.night,.phase-album .quilt2.night{display:block}
 .phase-party .quilt2.invite,.phase-album .quilt2.invite{display:none}
-.phase-album .quilt2.night{grid-template-areas:"album album" "n1 n2" "award award" "myst myst" "foot foot"}
-@media (min-width:760px){.phase-album .quilt2.night{grid-template-areas:"album album album album album album" "award award award myst myst myst" "n1 n1 foot foot foot foot"}}
-.phase-album .night [data-party-only]{display:none}
-.phase-album .night .n-time{display:none}
 
 .tl{list-style:none;margin:20px 0 0;padding:0}
 .tl li{display:grid;grid-template-columns:84px 1fr;gap:2px 12px;padding:14px 0;border-top:1.5px dashed #2f2a2e3a;align-items:baseline;transition:opacity .4s}
@@ -230,7 +232,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .hostctl .btn{margin:10px 10px 0 0}
 
 /* music */
-.music{position:fixed;z-index:30;right:max(14px, env(safe-area-inset-right));top:max(14px, env(safe-area-inset-top));
+.music{position:absolute;z-index:3;right:12px;top:12px;
   display:flex;align-items:center;gap:8px;background:var(--speck),var(--cream);border:0;border-radius:999px;padding:8px 14px 8px 10px;cursor:pointer;box-shadow:0 6px 16px -6px #1c1518aa;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
 .music svg{width:22px;height:22px}
 .music .eq{display:inline-flex;gap:2px;align-items:flex-end;height:14px}
@@ -250,6 +252,9 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 /* ---------- phones ---------- */
 @media (max-width:560px){
   .top{padding-inline:12px}
+  .tabs{width:calc(100% - 24px)}
+  .tabs{padding:0 4px;gap:0}
+  .tabs button{flex:1 1 auto;font-size:22px;padding:13px 4px 9px}
   .after{padding-inline:12px}
   .patch{padding:26px 20px}
   .art-patch{min-height:120px}
@@ -286,13 +291,13 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 <div class="quilt" id="quilt" aria-hidden="true"></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
-<button class="music" id="music" aria-pressed="false" aria-label="Background music">
-  <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span id="musicLabel">music off</span>
-</button>
 
 <header class="top">
   <div class="ic">
     <div class="ic-sky" id="icSky" aria-hidden="true"></div>
+    <button class="music" id="music" aria-pressed="false" aria-label="Background music">
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span id="musicLabel">music off</span>
+    </button>
     <div class="ic-paper">
       <p class="kicker" id="kicker">you're invited to</p>
       <p class="hosts">Sue &amp; Sian's</p>
@@ -302,6 +307,8 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
     <div class="ic-ground" id="icGround" aria-hidden="true"></div>
   </div>
 </header>
+
+<nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
 
 <section class="after" id="after" aria-label="RSVP, costume vote and notes">
   <div class="quilt2 invite">
@@ -328,7 +335,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
     </div>
     <div class="patch art-patch" style="--c:var(--char);grid-area:a1" data-art="lily"></div>
     <div class="patch art-patch" style="--c:var(--mocha-d);grid-area:a2" data-art="ghosts"></div>
-    <div class="patch" style="--c:var(--powder);grid-area:vote">
+    <div class="patch" style="--c:var(--powder);grid-area:vote" id="votePatch">
       <h2 class="p-title">costume theme</h2>
       <p class="p-sub">pick as many as you like · anonymous, we only count</p>
       <form id="voteForm">
@@ -339,7 +346,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
       <p class="p-sub" id="voters" style="margin-top:6px"></p>
     </div>
     <div class="patch art-patch" style="--c:var(--peri);grid-area:a3" data-art="night"></div>
-    <div class="patch" style="--c:var(--rose);grid-area:note">
+    <div class="patch" style="--c:var(--rose);grid-area:note" id="notePatch">
       <h2 class="p-title">a note for Sue &amp; Sian</h2>
       <p class="p-sub">only the hosts can read this ♡</p>
       <form id="noteForm" novalidate>
@@ -349,7 +356,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
         <span class="status" id="noteStatus" role="status"></span>
       </form>
     </div>
-    <div class="patch" style="--c:var(--sage);grid-area:time">
+    <div class="patch" style="--c:var(--sage);grid-area:time" id="planPatch">
       <h2 class="p-title">the night</h2>
       <p class="p-sub">Saturday, Oct 31 · a loose plan</p>
       <ol class="tl"></ol>
@@ -367,7 +374,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
       <p class="p-sub" id="tlSub">Saturday, Oct 31</p>
       <ol class="tl"></ol>
     </div>
-    <div class="patch" style="--c:var(--lilac);grid-area:fort" data-party-only>
+    <div class="patch" style="--c:var(--lilac);grid-area:fort" id="fortPatch">
       <h2 class="p-title">your card</h2>
       <p class="p-sub">draw one to check in for the night</p>
       <form id="joinForm" novalidate>
@@ -380,12 +387,12 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
     </div>
     <div class="patch art-patch" style="--c:var(--mocha-d);grid-area:n1" data-art="ghosts"></div>
     <div class="patch art-patch" style="--c:var(--peri);grid-area:n2" data-art="night"></div>
-    <div class="patch dark" style="--c:var(--char);grid-area:myst">
+    <div class="patch dark" style="--c:var(--char);grid-area:myst" id="mystPatch">
       <h2 class="p-title">who's the ghost?</h2>
       <p class="p-sub" id="mystSub">one of us is not who they seem</p>
       <div id="myst"></div>
     </div>
-    <div class="patch" style="--c:var(--blush);grid-area:spin" data-party-only>
+    <div class="patch" style="--c:var(--blush);grid-area:spin" id="spinPatch">
       <h2 class="p-title">trick or treat</h2>
       <p class="p-sub">tap the pumpkin · do it, or take a sip</p>
       <div class="wheel">
@@ -393,12 +400,12 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
         <div class="slip" id="slip" aria-live="polite"><span>your turn</span><b>tap the pumpkin</b></div>
       </div>
     </div>
-    <div class="patch" style="--c:var(--powder);grid-area:liar" data-party-only>
+    <div class="patch" style="--c:var(--powder);grid-area:liar" id="liarPatch">
       <h2 class="p-title">the liar game</h2>
       <p class="p-sub">everyone gets the word but one · find the liar</p>
       <div id="liar"></div>
     </div>
-    <div class="patch" style="--c:var(--rose);grid-area:songs" data-party-only>
+    <div class="patch" style="--c:var(--rose);grid-area:songs" id="songsPatch">
       <h2 class="p-title">song requests</h2>
       <p class="p-sub">add a song · we'll play them in order</p>
       <form class="up" id="songForm" novalidate>
@@ -408,12 +415,12 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
       <span class="status" id="songStatus" role="status"></span>
       <ol class="songs" id="songs"></ol>
     </div>
-    <div class="patch" style="--c:var(--butter);grid-area:award">
+    <div class="patch" style="--c:var(--butter);grid-area:award" id="awardPatch">
       <h2 class="p-title">costume awards</h2>
       <p class="p-sub" id="awardSub">one vote per category · secret until the ceremony</p>
       <div id="awards"></div>
     </div>
-    <div class="patch art-patch" style="--c:var(--char);grid-area:n3" data-art="lily" data-party-only></div>
+    <div class="patch art-patch" style="--c:var(--char);grid-area:n3" data-art="lily"></div>
     <div class="patch paper" style="--c:var(--cream);grid-area:album" id="albumPatch">
       <h2 class="p-title">the album</h2>
       <p class="p-sub" id="albumSub">everyone can add photos · straight from your phone</p>
@@ -1167,6 +1174,28 @@ $('#hostForm').addEventListener('submit', async e => {
     msgs.forEach(m => { const li = document.createElement('li'); li.textContent = m.body; const s = document.createElement('small'); s.textContent = (m.name || 'a mystery guest') + ' · ' + new Date(m.at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}); li.appendChild(s); list.appendChild(li); });
   } catch (err) { say(out, err.code === '28P01' ? 'that passcode isn\'t right' : 'couldn\'t load, try again', true); }
 });
+
+/* tabs: one section at a time */
+const TABS = {
+  invite: [['rsvp', 'rsvp', ['#rsvpPatch']], ['theme', 'theme', ['#votePatch']], ['plan', 'the night', ['#planPatch']], ['note', 'a note', ['#notePatch']]],
+  party: [['tonight', 'tonight', ['#nightTop', '#fortPatch']], ['ghost', 'ghost', ['#mystPatch']], ['games', 'games', ['#spinPatch', '#liarPatch']],
+          ['awards', 'awards', ['#awardPatch']], ['songs', 'songs', ['#songsPatch']], ['album', 'album', ['#albumPatch']]],
+  album: [['album', 'album', ['#albumPatch']], ['results', 'results', ['#awardPatch', '#mystPatch']]],
+}[PHASE];
+const tabBar = $('#tabs'), panes = [...document.querySelectorAll(PHASE === 'invite' ? '.invite > .patch:not(.foot)' : '.night > .patch:not(.foot)')];
+function showTab(id, scroll){
+  const tab = TABS.find(t => t[0] === id) || TABS[0], on = tab[2].map(q => $(q));
+  panes.forEach(p => { p.hidden = !on.includes(p); });
+  tabBar.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab[0]));
+  store.set('hp-tab-' + PHASE, tab[0]);
+  if (scroll && scrollY > tabBar.offsetTop) scrollTo({top: tabBar.offsetTop});
+}
+TABS.forEach(([id, label]) => {
+  const b = el('button', '', label); b.type = 'button'; b.dataset.tab = id; b.setAttribute('role', 'tab');
+  b.addEventListener('click', () => { showTab(id, true); b.scrollIntoView({block: 'nearest', inline: 'nearest'}); });
+  tabBar.appendChild(b);
+});
+showTab(store.get('hp-tab-' + PHASE));
 
 if (PHASE === 'invite') loadBoard(); else loadParty();
 })();
