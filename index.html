@@ -223,8 +223,8 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .foot-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:18px}
 
 /* ---------- party night ---------- */
-.quilt2.night{display:none;grid-template-areas:"time time" "fort fort" "n1 n2" "myst myst" "award award" "n3 n3" "album album" "foot foot"}
-@media (min-width:760px){.quilt2.night{grid-template-areas:"time time time fort fort fort" "myst myst myst myst n1 n1" "n2 n2 award award award award" "album album album album album album" "n3 n3 foot foot foot foot"}}
+.quilt2.night{display:none;grid-template-areas:"time time" "fort fort" "n1 n2" "myst myst" "spin spin" "liar liar" "award award" "n3 n3" "songs songs" "album album" "foot foot"}
+@media (min-width:760px){.quilt2.night{grid-template-areas:"time time time fort fort fort" "myst myst myst myst n1 n1" "spin spin spin liar liar liar" "n2 n2 award award award award" "songs songs songs songs n3 n3" "album album album album album album" "foot foot foot foot foot foot"}}
 .phase-party .quilt2.night,.phase-album .quilt2.night{display:grid}
 .phase-party .quilt2.invite,.phase-album .quilt2.invite{display:none}
 .phase-album .quilt2.night{grid-template-areas:"album album" "n1 n2" "award award" "myst myst" "foot foot"}
@@ -233,9 +233,9 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .phase-album .night .n-time{display:none}
 
 .tl{list-style:none;margin:20px 0 0;padding:0}
-.tl li{display:grid;grid-template-columns:72px 1fr;gap:2px 14px;padding:12px 0;border-top:1.5px dashed #2f2a2e3a;align-items:baseline;transition:opacity .4s}
+.tl li{display:grid;grid-template-columns:86px 1fr;gap:2px 12px;padding:12px 0;border-top:1.5px dashed #2f2a2e3a;align-items:baseline;transition:opacity .4s}
 .tl li:first-child{border-top:0}
-.tl time{grid-row:span 2;font-size:13px;letter-spacing:.1em;font-variant-numeric:tabular-nums}
+.tl time{grid-row:span 2;white-space:nowrap;font-size:13px;letter-spacing:.1em;font-variant-numeric:tabular-nums}
 .tl b{font-family:var(--hand);font-weight:400;font-size:30px;line-height:.85}
 .tl small{font-size:12.5px;line-height:1.45;opacity:.75}
 .tl li.past{opacity:.42}
@@ -243,7 +243,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 
 .tarot{margin:22px auto 0;width:min(210px,64%);aspect-ratio:5/8;perspective:1000px;border:0;padding:0;background:none;display:block;cursor:pointer}
 .tarot[hidden]{display:none}
-.tarot-in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.4,0,.2,1)}
+.tarot-in{display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.4,0,.2,1)}
 .tarot.flip .tarot-in{transform:rotateY(180deg)}
 .t-face{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 14px 28px -12px #1c1518aa;overflow:hidden}
 .t-back{background:radial-gradient(circle at 30% 30%, var(--butter) 7%, transparent 9%) 0 0/22px 22px, var(--speck), var(--peri-d);display:grid;place-items:center}
@@ -303,6 +303,29 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .lb figure{margin:0;max-width:min(900px,100%);text-align:center;color:var(--cream)}
 .lb img{max-width:100%;max-height:80svh;display:block;margin:0 auto;box-shadow:0 20px 50px -10px #000}
 .lb figcaption{font-family:var(--hand);font-size:30px;margin-top:10px}
+.wheel{margin:22px 0 0;display:grid;justify-items:center;gap:6px;text-align:center}
+.wheel-btn{width:min(120px,36%);aspect-ratio:1;border:0;padding:0;background:none;cursor:pointer;transition:transform .2s}
+.wheel-btn svg{width:100%;display:block}
+.wheel-btn.spinning{animation:wob .18s ease-in-out infinite alternate}
+@keyframes wob{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+.slip{width:100%;max-width:420px;min-height:118px;margin-top:6px;padding:16px 18px;background:var(--dspeck),var(--speck),var(--cream);border-radius:3px;box-shadow:0 10px 20px -12px #1c151899;transform:rotate(-1.2deg);display:grid;align-content:center;gap:6px}
+.slip span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.65}
+.slip b{font-family:var(--hand);font-weight:400;font-size:clamp(30px,7vw,38px);line-height:.9}
+.slip.blur b{filter:blur(1.5px);opacity:.6}
+.word{margin-top:20px;padding:22px 20px;background:#ffffff66;border-radius:3px;text-align:center}
+.word span{display:block;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;opacity:.75}
+.word b{display:block;font-family:var(--hand);font-weight:400;font-size:clamp(50px,11vw,72px);line-height:.85;margin-top:8px}
+.word small{display:block;margin-top:8px;font-size:12.5px;line-height:1.5;opacity:.8}
+.word.secret-w{cursor:pointer;border:2px dashed #2f2a2e55;width:100%;font:inherit;color:inherit}
+.btn.ghosty{background:transparent;color:var(--ink);box-shadow:none;border:2px solid var(--ink)}
+.songs{list-style:none;margin:20px 0 0;padding:0;counter-reset:s}
+.songs li{counter-increment:s;display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:baseline;padding:10px 0;border-top:1.5px dashed #2f2a2e3a}
+.songs li:first-child{border-top:0}
+.songs li::before{content:counter(s);font-size:12px;font-variant-numeric:tabular-nums;opacity:.6}
+.songs b{font-weight:400;font-size:15px;overflow-wrap:anywhere}
+.songs small{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6;margin-top:2px}
+.songs li.played b{text-decoration:line-through;opacity:.5}
+.songs .tick{border:0;background:none;cursor:pointer;font-size:12px;letter-spacing:.12em;text-transform:uppercase;text-decoration:underline;text-underline-offset:3px;opacity:.75;padding:4px}
 .hostctl{margin-top:24px;border-top:2px dashed #2f2a2e44;padding-top:18px}
 .hostctl .btn{margin:10px 10px 0 0}
 
@@ -497,12 +520,35 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
       <p class="p-sub" id="mystSub">one of us is not who they seem</p>
       <div id="myst"></div>
     </div>
+    <div class="patch" style="--c:var(--blush);grid-area:spin" data-party-only>
+      <h2 class="p-title">trick or treat</h2>
+      <p class="p-sub">tap the pumpkin · do it, or take a sip</p>
+      <div class="wheel">
+        <button class="wheel-btn" id="spinBtn" type="button" aria-label="Spin the trick-or-treat wheel"></button>
+        <div class="slip" id="slip" aria-live="polite"><span>your turn</span><b>tap the pumpkin</b></div>
+      </div>
+    </div>
+    <div class="patch" style="--c:var(--powder);grid-area:liar" data-party-only>
+      <h2 class="p-title">the liar game</h2>
+      <p class="p-sub">everyone gets the word but one · find the liar</p>
+      <div id="liar"></div>
+    </div>
+    <div class="patch" style="--c:var(--rose);grid-area:songs" data-party-only>
+      <h2 class="p-title">song requests</h2>
+      <p class="p-sub">add a song · we'll play them in order</p>
+      <form class="up" id="songForm" novalidate>
+        <div class="field"><label for="songIn">song & artist</label><input class="in" id="songIn" maxlength="120" placeholder="e.g. Thriller · Michael Jackson"></div>
+        <button class="btn" id="songBtn" type="submit">request</button>
+      </form>
+      <span class="status" id="songStatus" role="status"></span>
+      <ol class="songs" id="songs"></ol>
+    </div>
     <div class="patch" style="--c:var(--butter);grid-area:award">
       <h2 class="p-title">costume awards</h2>
       <p class="p-sub" id="awardSub">one vote per category · secret until the ceremony</p>
       <div id="awards"></div>
     </div>
-    <div class="patch art-patch" style="--c:var(--char);grid-area:n3" data-art="lily"></div>
+    <div class="patch art-patch" style="--c:var(--char);grid-area:n3" data-art="lily" data-party-only></div>
     <div class="patch paper" style="--c:var(--cream);grid-area:album" id="albumPatch">
       <h2 class="p-title">the album</h2>
       <p class="p-sub" id="albumSub">everyone can add photos · straight from your phone</p>
@@ -963,7 +1009,7 @@ const PLAN = [
   [18, 0, 'dinner', 'sit down, eat well, admire each other\'s costumes'],
   [19, 30, 'fortune cards', 'everyone draws a card · the roles are dealt in secret'],
   [20, 0, 'costume parade', 'a little catwalk, one by one · photo time for the album'],
-  [20, 45, 'sweets & mischief', 'candy, drinks, wandering · the ghost is on the move'],
+  [20, 45, 'drinks & games', 'the trick-or-treat wheel & the liar game · the ghost is on the move'],
   [21, 45, 'last votes', 'cast your costume awards & name the ghost'],
   [22, 15, 'the reveal', 'the ghost is unmasked, then the awards'],
   [22, 45, 'one last photo', 'all of us together · then goodnight'],
@@ -1191,9 +1237,117 @@ $('#upFile').addEventListener('change', async e => {
   say(out, failed ? `${failed} photo${failed > 1 ? 's' : ''} didn't make it, try again` : done > 1 ? `${done} photos added ♡` : 'added to the album ♡', !!failed);
 });
 
-function renderParty(){
+/* trick-or-treat wheel (just on this phone) */
+const SPINS = [
+  ['trick', 'say one line in your costume\'s voice'],
+  ['trick', 'toast with the person on your left'],
+  ['trick', 'tell us your scariest real-life moment'],
+  ['trick', 'everyone wearing black takes a sip'],
+  ['trick', 'do your slowest, scariest walk across the room'],
+  ['trick', 'name three horror films in five seconds'],
+  ['trick', 'pick someone to sip with you'],
+  ['trick', 'your best ghost noise, full volume'],
+  ['trick', 'compliment every costume in ten seconds'],
+  ['trick', 'no saying "ghost" until your next turn'],
+  ['trick', 'swap one costume piece with someone'],
+  ['trick', 'the youngest person takes a sip'],
+  ['treat', 'safe! take a sweet'],
+  ['treat', 'make a rule everyone must follow'],
+  ['treat', 'choose who spins next'],
+  ['treat', 'everyone else sips, you\'re off the hook'],
+];
+$('#spinBtn').innerHTML = A.pumpkin();
+let spinning = false, lastSpin = -1;
+$('#spinBtn').addEventListener('click', () => {
+  if (spinning) return; spinning = true;
+  const btn = $('#spinBtn'), slip = $('#slip'), [kind, txt] = [slip.querySelector('span'), slip.querySelector('b')];
+  btn.classList.add('spinning'); slip.classList.add('blur');
+  let n = 0, i;
+  const steps = reduce ? 1 : 14;
+  (function roll(){
+    do i = Math.floor(Math.random() * SPINS.length); while (i === lastSpin);
+    kind.textContent = SPINS[i][0]; txt.textContent = SPINS[i][1];
+    if (++n < steps) { chime(70 + n); setTimeout(roll, 50 + n * n * 1.6); return; }
+    lastSpin = i; spinning = false; btn.classList.remove('spinning'); slip.classList.remove('blur');
+    btn.classList.toggle('lit', SPINS[i][0] === 'treat'); chime(SPINS[i][0] === 'treat' ? 91 : 76);
+    if (SPINS[i][0] === 'treat') burst(40);
+  })();
+});
+
+/* the liar game: everyone sees the word except the liar */
+let wordOpen = false, wordRound = 0;
+function renderLiar(){
+  const box = $('#liar'), g = party.liar, me = party.me;
+  box.textContent = '';
+  if (!me) { box.appendChild(el('p', 'empty', 'draw your card to play')); return; }
+  if (g && g.round !== wordRound) { wordRound = g.round; wordOpen = false; }
+  if (g) {
+    if (g.revealed) {
+      const w = el('div', 'word'); w.append(el('span', '', `round ${g.round} · ${g.category}`), el('b', '', g.word), el('small', '', `the liar was ${g.liar}`));
+      box.appendChild(w);
+    } else {
+      const w = el('button', 'word secret-w'); w.type = 'button';
+      if (!wordOpen) w.append(el('span', '', `round ${g.round} · ${g.category}`), el('b', '', 'tap to see'), el('small', '', 'keep your screen to yourself'));
+      else if (g.me_liar) w.append(el('span', '', `round ${g.round} · ${g.category}`), el('b', '', 'you\'re the liar'), el('small', '', 'you don\'t know the word. listen closely, blend in.'));
+      else w.append(el('span', '', `round ${g.round} · ${g.category}`), el('b', '', g.word), el('small', '', 'take turns describing it in one word. don\'t make it too easy.'));
+      w.addEventListener('click', () => { wordOpen = !wordOpen; renderLiar(); });
+      box.appendChild(w);
+    }
+  } else box.appendChild(el('p', 'empty', 'no round yet. anyone can start one.'));
+  const row = el('div'), out = el('span', 'status'); out.setAttribute('role', 'status');
+  const go = el('button', 'btn', g ? 'new round' : 'start a round'); go.type = 'button';
+  const act = async (a, msg) => {
+    if (a === 'new' && g && !g.revealed && !confirm('start a new round? the current word will be lost.')) return;
+    go.disabled = true; say(out, msg);
+    try { await rpc('party_liar', {p_token: token, p_action: a}); say(out, ''); if (a === 'reveal') burst(50); else chime(84); loadParty(); }
+    catch (err) { say(out, /three/.test(err.message || '') ? 'need at least 3 people checked in' : 'couldn\'t do that, try again', true); }
+    go.disabled = false;
+  };
+  go.addEventListener('click', () => act('new', 'shuffling words…'));
+  row.appendChild(go);
+  if (g && !g.revealed) {
+    const rv = el('button', 'btn ghosty', 'reveal the liar'); rv.type = 'button'; rv.style.marginLeft = '10px';
+    rv.addEventListener('click', () => { if (confirm('reveal the liar and the word to everyone?')) act('reveal', 'unmasking…'); });
+    row.appendChild(rv);
+  }
+  box.append(row, out);
+}
+
+/* song requests */
+function renderSongs(){
+  const ol = $('#songs'), list = party.songs || [], hk = hostKey();
+  ol.textContent = '';
+  if (!list.length) { ol.appendChild(el('p', 'empty', 'no requests yet')); return; }
+  list.forEach(s => {
+    const li = el('li', s.played ? 'played' : ''), t = el('div'), b = el('b', '', s.song);
+    t.append(b, el('small', '', s.name || 'a guest')); li.append(t);
+    if (hk) {
+      const k = el('button', 'tick', s.played ? 'undo' : 'played'); k.type = 'button';
+      k.addEventListener('click', async () => { try { await rpc('party_song_played', {p_key: hk, p_id: s.id}); loadParty(); } catch (e) {} });
+      li.appendChild(k);
+    } else li.appendChild(el('span'));
+    ol.appendChild(li);
+  });
+}
+$('#songForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const song = $('#songIn').value.trim(), out = $('#songStatus');
+  if (!song) { say(out, 'type a song first', true); $('#songIn').focus(); return; }
+  const btn = $('#songBtn'); btn.disabled = true; say(out, 'adding…');
+  try { await rpc('party_add_song', {p_token: token, p_song: song}); $('#songIn').value = ''; say(out, 'on the list ♡'); chime(86); loadParty(); }
+  catch (err) { say(out, 'couldn\'t add it, try again', true); }
+  btn.disabled = false;
+});
+
+const drawn = {};
+function renderParty(force){
   if (party.me) showFortune(party.me.fortune, false);
-  renderMystery(); renderAwards(); renderAlbum();
+  const p = party, hk = !!hostKey();
+  // only redraw a section when its data changed, so half-made picks survive the 15s refresh
+  [[renderMystery, [p.state, p.me, p.players, p.my_accuse, p.accuse_count, p.ghost, p.accuse_tally]],
+   [renderAwards, [p.state, p.me, p.players, p.my_awards, p.award_voters, p.awards]],
+   [renderLiar, [p.me && p.me.id, p.liar]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
+  .forEach(([fn, data]) => { const s = JSON.stringify(data); if (force || drawn[fn.name] !== s) { drawn[fn.name] = s; fn(); } });
 }
 async function loadParty(){
   try { party = await rpc('party_board', {p_token: token}); renderParty(); } catch (e) { /* keep last view */ }
@@ -1229,7 +1383,7 @@ $('#hostForm').addEventListener('submit', async e => {
     const key = $('#hostKey').value;
     const [msgs, all] = await Promise.all([rpc('host_messages', {p_key: key}), rpc('host_guests', {p_key: key})]);
     try { sessionStorage.setItem('hp-host', key); } catch (e) {}
-    if (PHASE !== 'invite') { $('#hostCtl').hidden = false; $('#hcPlayers').textContent = party ? (party.players || []).length : 0; if (party) renderAlbum(); }
+    if (PHASE !== 'invite') { $('#hostCtl').hidden = false; $('#hcPlayers').textContent = party ? (party.players || []).length : 0; if (party) renderParty(); }
     [['yes','coming'],['maybe','maybe'],['no',"can't make it"]].forEach(([st, label]) => {
       const who = all.filter(x => x.status === st);
       const box = document.createElement('div'); box.className = 'guests';
