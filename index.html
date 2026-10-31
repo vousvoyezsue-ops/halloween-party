@@ -261,6 +261,16 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .roles{list-style:none;margin:14px 0 0;padding:0}
 .roles li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1.5px dashed #f1ebe333;font-size:15px}
 .roles li.out span:first-child{text-decoration:line-through;opacity:.6}
+.mchat{margin-top:16px;border-top:1.5px dashed #f1ebe344;padding-top:14px}
+.mchat h4{margin:0;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.mlog{list-style:none;margin:10px 0 0;padding:0;max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.mlog li{max-width:85%;align-self:flex-start;background:#ffffff1f;padding:8px 12px;border-radius:12px 12px 12px 3px;font-size:15px;line-height:1.4;overflow-wrap:anywhere}
+.mlog li.mine{align-self:flex-end;background:var(--cream);color:var(--ink);border-radius:12px 12px 3px 12px}
+.mlog li.none{background:none;padding:0;opacity:.75}
+.mlog small{display:block;font-size:12px;font-weight:700;opacity:.8;margin-bottom:2px}
+.msend{display:flex;gap:8px;margin-top:10px}
+.msend .in{flex:1;min-width:0}
+.msend .btn{margin:0;width:auto;padding:10px 16px}
 .mhost{margin-top:22px;padding-top:16px;border-top:2px dashed #f1ebe344}
 .mhost .btn{margin:10px 10px 0 0}
 .hostctl{margin-top:24px;border-top:2px dashed #2f2a2e44;padding-top:18px}
@@ -1166,6 +1176,24 @@ const ROLE = {
   citizen: ['you are a citizen', 'at night, tap anyone so no one can tell who\'s acting. by day, find the mafia.'],
 };
 let mafiaOpen = false, mafiaKey = '';
+/* mafia-only chat: one persistent box, so typing survives refreshes */
+const chatBox = el('div', 'mchat'), chatLog = el('ul', 'mlog'), chatForm = el('form', 'msend'), chatIn = el('input', 'in'), chatBtn = el('button', 'btn', 'send');
+chatIn.maxLength = 200; chatIn.placeholder = 'whisper to your team…'; chatIn.setAttribute('aria-label', 'Message to your team'); chatIn.autocomplete = 'off'; chatBtn.type = 'submit';
+chatForm.append(chatIn, chatBtn); chatBox.append(el('h4', '', 'mafia only · nobody else can see this'), chatLog, chatForm);
+chatForm.addEventListener('submit', async e => {
+  e.preventDefault(); const body = chatIn.value.trim(); if (!body) return;
+  chatBtn.disabled = true;
+  try { await rpc('mafia_say', {p_token: token, p_body: body}); chatIn.value = ''; chatIn.placeholder = 'whisper to your team…'; loadParty(); }
+  catch (err) { chatIn.placeholder = 'couldn\'t send, try again'; }
+  chatBtn.disabled = false; chatIn.focus();
+});
+function renderMafiaChat(){
+  const c = (party.mafia && party.mafia.chat) || [];
+  chatLog.textContent = '';
+  if (!c.length) chatLog.appendChild(el('li', 'none', 'no messages yet.'));
+  c.forEach(m => { const li = el('li', m.mine ? 'mine' : ''); if (!m.mine) li.appendChild(el('small', '', m.name)); li.appendChild(document.createTextNode(m.body)); chatLog.appendChild(li); });
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
 const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="#e8dc93" stroke="none"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/></svg>';
 function renderMafiaNarr(){
   const g = party.mafia, box = $('#mafiaNarr'); box.textContent = '';
@@ -1246,6 +1274,7 @@ function renderMafiaMe(){
         if (me.role === 'police') { list = alive.filter(p => p.id !== me.id); lock = g.my_pick != null; ask = 'investigate this person? you only get one each night.'; }
         body.appendChild(picks(list, g.my_pick, p => mafiaAct(p, out, ask), lock));
       }
+      if (me.role === 'mafia') { body.appendChild(chatBox); renderMafiaChat(); }
       pk.appendChild(body);
     }
     box.appendChild(pk);
@@ -1284,7 +1313,8 @@ function renderParty(force){
    [renderAwards, [p.state, p.me, p.players, p.my_awards, p.award_voters, p.awards]],
    [renderLiar, [p.me && p.me.id, p.liar, hk]],
    [renderMafiaNarr, [p.mafia && [p.mafia.phase, p.mafia.day, p.mafia.announcement, p.mafia.winner, p.mafia.players, p.mafia.acted, p.mafia.alive, p.mafia.tally, p.mafia.last_tally]]],
-   [renderMafiaMe, [p.mafia && Object.assign({}, p.mafia, {acted: 0, tally: null, last_tally: null}), hk, mafiaOpen]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
+   [renderMafiaMe, [p.mafia && Object.assign({}, p.mafia, {acted: 0, tally: null, last_tally: null, chat: null}), hk, mafiaOpen]],
+   [renderMafiaChat, [p.mafia && p.mafia.chat]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
   .forEach(([fn, data]) => { const s = JSON.stringify(data); if (force || drawn[fn.name] !== s) { drawn[fn.name] = s; fn(); } });
 }
 async function loadParty(){
@@ -1292,7 +1322,8 @@ async function loadParty(){
     const [b, m] = await Promise.all([rpc('party_board', {p_token: token}), rpc('mafia_board', {p_token: token}).catch(() => null)]);
     party = b; party.mafia = m; renderParty();
   } catch (e) { /* keep last view */ }
-  clearTimeout(partyTimer); partyTimer = setTimeout(function again(){ if (!document.hidden) loadParty(); else partyTimer = setTimeout(again, 8000); }, 8000);
+  clearTimeout(partyTimer); const wait = party && party.mafia && party.mafia.me && party.mafia.me.role === 'mafia' && mafiaOpen ? 3000 : 8000;
+  partyTimer = setTimeout(function again(){ if (!document.hidden) loadParty(); else partyTimer = setTimeout(again, wait); }, wait);
 }
 
 /* hosts */
