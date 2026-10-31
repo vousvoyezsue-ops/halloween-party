@@ -247,9 +247,11 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .tally li.skip{font-style:italic}
 .tally li.skip .bar i{background:currentColor;opacity:.45}
 .tally b{font-variant-numeric:tabular-nums;text-align:right}
-.outs{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;align-items:center}
-.outs em{font-style:normal;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-right:4px}
-.outs span{font-size:13.5px;padding:3px 10px;border-radius:999px;background:color-mix(in srgb, currentColor 12%, transparent);text-decoration:line-through}
+.outs{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.outs li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:baseline;font-size:15px}
+.outs li i{font-style:normal;text-align:center}
+.outs li b{font-weight:400;text-decoration:line-through;text-decoration-thickness:1.5px}
+.outs li small{font-size:13.5px;opacity:.8;white-space:nowrap}
 .peek{margin-top:18px;border:2px dashed #f1ebe366;border-radius:4px;background:#ffffff0d}
 .peek > button{width:100%;border:0;background:none;color:inherit;padding:16px;cursor:pointer;font-family:var(--hand);font-size:30px;line-height:1}
 .peek > button small{display:block;font-family:var(--type);font-size:14px;opacity:.85;margin-top:6px}
@@ -1218,7 +1220,16 @@ function renderMafiaNarr(){
     n.append(el('div', 'tally-h', day ? 'votes so far' : 'how the town voted'), ul);
   }
   const gone = g.players.filter(p => !p.alive);
-  if (gone.length && g.phase !== 'over') { const o = el('div', 'outs'); o.appendChild(el('em', '', 'out')); gone.forEach(p => o.appendChild(el('span', '', p.name))); n.appendChild(o); }
+  if (gone.length && g.phase !== 'over') {
+    const o = el('ul', 'outs');
+    gone.sort((a, b) => (a.out_day || 0) * 2 + (a.out === 'vote') - ((b.out_day || 0) * 2 + (b.out === 'vote'))).forEach(p => {
+      const li = el('li'), how = p.out === 'vote' ? `voted out, day ${p.out_day}` : p.out === 'mafia' ? `mafia, night ${p.out_day}` : 'out';
+      li.append(el('i', '', p.out === 'vote' ? '🗳' : '🔪'), el('span'));
+      li.lastChild.append(el('b', '', p.name), document.createTextNode(' '), el('small', '', how));
+      o.appendChild(li);
+    });
+    n.append(el('div', 'tally-h', 'out so far'), o);
+  }
   box.appendChild(n);
 }
 function picks(players, chosen, onPick, disabled){
