@@ -244,6 +244,8 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .tally .bar{height:10px;border-radius:5px;background:color-mix(in srgb, currentColor 13%, transparent);overflow:hidden}
 .tally .bar i{display:block;height:100%;width:var(--p);background:var(--red);border-radius:5px;transition:width .5s}
 .is-night .tally .bar i{background:var(--butter)}
+.tally li.skip{font-style:italic}
+.tally li.skip .bar i{background:currentColor;opacity:.45}
 .tally b{font-variant-numeric:tabular-nums;text-align:right}
 .outs{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;align-items:center}
 .outs em{font-style:normal;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-right:4px}
@@ -1175,7 +1177,7 @@ const ROLE = {
   police: ['you are the police', 'each night, investigate one person. you\'ll learn if they\'re mafia.'],
   citizen: ['you are a citizen', 'at night, tap anyone so no one can tell who\'s acting. by day, find the mafia.'],
 };
-let mafiaOpen = false, mafiaKey = '';
+let mafiaOpen = false, mafiaKey = '', skippedDay = 0;
 /* mafia-only chat: one persistent box, so typing survives refreshes */
 const chatBox = el('div', 'mchat'), chatLog = el('ul', 'mlog'), chatForm = el('form', 'msend'), chatIn = el('input', 'in'), chatBtn = el('button', 'btn', 'send');
 chatIn.maxLength = 200; chatIn.placeholder = 'whisper to your team…'; chatIn.setAttribute('aria-label', 'Message to your team'); chatIn.autocomplete = 'off'; chatBtn.type = 'submit';
@@ -1212,7 +1214,7 @@ function renderMafiaNarr(){
   const tally = day ? g.tally : g.last_tally;
   if (tally && tally.length) {
     const top1 = tally[0].n, ul = el('ul', 'tally');
-    tally.forEach(t => { const li = el('li'), bar = el('span', 'bar'), fill = el('i'); fill.style.setProperty('--p', (t.n / top1 * 100) + '%'); bar.appendChild(fill); li.append(el('span', '', t.name), bar, el('b', '', t.n)); ul.appendChild(li); });
+    tally.forEach(t => { const li = el('li', t.name === 'skip' ? 'skip' : ''), bar = el('span', 'bar'), fill = el('i'); fill.style.setProperty('--p', (t.n / top1 * 100) + '%'); bar.appendChild(fill); li.append(el('span', '', t.name), bar, el('b', '', t.n)); ul.appendChild(li); });
     n.append(el('div', 'tally-h', day ? 'votes so far' : 'how the town voted'), ul);
   }
   const gone = g.players.filter(p => !p.alive);
@@ -1230,7 +1232,11 @@ function picks(players, chosen, onPick, disabled){
 async function mafiaAct(p, out, confirmText){
   if (confirmText && !confirm(confirmText)) return;
   say(out, '…');
-  try { const r = await rpc('mafia_act', {p_token: token, p_target: p.id}); say(out, r ? `${r.name} is ${r.is_mafia ? 'MAFIA' : 'not mafia'}` : `you picked ${p.name}`); chime(80); loadParty(); }
+  try {
+    const r = await rpc('mafia_act', {p_token: token, p_target: p.id});
+    if (p.id == null) skippedDay = party.mafia.day; else if (party.mafia.phase === 'day') skippedDay = 0;
+    say(out, r ? `${r.name} is ${r.is_mafia ? 'MAFIA' : 'not mafia'}` : p.id == null ? 'you skipped this vote' : `you picked ${p.name}`); chime(80); loadParty();
+  }
   catch (err) { say(out, /already/.test(err.message || '') ? 'you already investigated tonight' : 'couldn\'t send, try again', true); }
 }
 function renderMafiaMe(){
@@ -1279,7 +1285,11 @@ function renderMafiaMe(){
     }
     box.appendChild(pk);
     if (me.alive && g.phase === 'day') {
-      box.append(el('p', 'legend', 'vote someone out'), picks(alive.filter(p => p.id !== me.id), g.my_pick, p => mafiaAct(p, out)));
+      const skipped = g.my_pick == null && skippedDay === g.day;
+      const vp = picks(alive.filter(p => p.id !== me.id), g.my_pick, p => mafiaAct(p, out));
+      const sk = el('button', '', 'skip · no vote'); sk.type = 'button'; sk.setAttribute('aria-pressed', skipped); sk.style.fontStyle = 'italic';
+      sk.addEventListener('click', () => mafiaAct({id: null, name: 'skip'}, out)); vp.appendChild(sk);
+      box.append(el('p', 'legend', 'vote someone out'), vp);
       box.lastChild.previousSibling.style.marginTop = '22px';
     }
     if (!me.alive && !mafiaOpen) box.appendChild(el('p', 'empty', 'you\'re out. watch quietly ♡'));
@@ -1313,7 +1323,7 @@ function renderParty(force){
    [renderAwards, [p.state, p.me, p.players, p.my_awards, p.award_voters, p.awards]],
    [renderLiar, [p.me && p.me.id, p.liar, hk]],
    [renderMafiaNarr, [p.mafia && [p.mafia.phase, p.mafia.day, p.mafia.announcement, p.mafia.winner, p.mafia.players, p.mafia.acted, p.mafia.alive, p.mafia.tally, p.mafia.last_tally]]],
-   [renderMafiaMe, [p.mafia && Object.assign({}, p.mafia, {acted: 0, tally: null, last_tally: null, chat: null}), hk, mafiaOpen]],
+   [renderMafiaMe, [p.mafia && Object.assign({}, p.mafia, {acted: 0, tally: null, last_tally: null, chat: null}), hk, mafiaOpen, skippedDay]],
    [renderMafiaChat, [p.mafia && p.mafia.chat]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
   .forEach(([fn, data]) => { const s = JSON.stringify(data); if (force || drawn[fn.name] !== s) { drawn[fn.name] = s; fn(); } });
 }
