@@ -1177,6 +1177,7 @@ const ROLE = {
   mafia: ['you are mafia', 'each night, pick someone to take. agree with your partner quietly.'],
   doctor: ['you are the doctor', 'each night, pick someone to protect. you can protect yourself.'],
   police: ['you are the police', 'each night, investigate one person. you\'ll learn if they\'re mafia.'],
+  medium: ['you are the medium', 'each night, pick someone who is out to learn what they were. only you will know.'],
   citizen: ['you are a citizen', 'at night, tap anyone so no one can tell who\'s acting. by day, find the mafia.'],
 };
 let mafiaOpen = false, mafiaKey = '', skippedDay = 0;
@@ -1246,7 +1247,7 @@ async function mafiaAct(p, out, confirmText){
   try {
     const r = await rpc('mafia_act', {p_token: token, p_target: p.id});
     if (p.id == null) skippedDay = party.mafia.day; else if (party.mafia.phase === 'day') skippedDay = 0;
-    say(out, r ? `${r.name} is ${r.is_mafia ? 'MAFIA' : 'not mafia'}` : p.id == null ? 'you skipped this vote' : `you picked ${p.name}`); chime(80); loadParty();
+    say(out, r && r.role ? `${r.name} was ${r.role}` : r ? `${r.name} is ${r.is_mafia ? 'MAFIA' : 'not mafia'}` : p.id == null ? 'you skipped this vote' : `you picked ${p.name}`); chime(80); loadParty();
   }
   catch (err) { say(out, /already/.test(err.message || '') ? 'you already investigated tonight' : 'couldn\'t send, try again', true); }
 }
@@ -1283,12 +1284,19 @@ function renderMafiaMe(){
     if (mafiaOpen) {
       const body = el('div', 'body'); body.append(el('h3', '', title), el('p', '', how));
       if (me.role === 'mafia' && g.team) body.appendChild(el('p', '', `your team: ${g.team.join(', ')}`));
+      if (me.role === 'medium' && g.readings) g.readings.forEach(c => body.appendChild(el('p', '', `night ${c.day}: ${c.name} was ${c.role}`)));
       if (me.role === 'police' && g.checks) g.checks.forEach(c => body.appendChild(el('p', '', `night ${c.day}: ${c.name} is ${c.is_mafia ? 'MAFIA' : 'not mafia'}`)));
       if (!me.alive) body.appendChild(el('p', '', 'you\'re out. watch quietly, no hints ♡'));
       else if (g.phase === 'night') {
         let list = alive, lock = false, ask = null;
         if (me.role === 'mafia') { const team = g.team || []; list = alive.filter(p => !team.includes(p.name)); if (g.team_pick) body.appendChild(el('p', '', `team's pick: ${g.team_pick}`)); }
         if (me.role === 'police') { list = alive.filter(p => p.id !== me.id); lock = g.my_pick != null; ask = 'investigate this person? you only get one each night.'; }
+        if (me.role === 'medium') {
+          const gone = g.players.filter(p => !p.alive);
+          lock = (g.readings || []).some(c => c.day === g.day);
+          if (gone.length) { list = gone; ask = 'read this person? you only get one each night.'; body.appendChild(el('p', '', 'who will you reach tonight?')); }
+          else body.appendChild(el('p', '', 'no one is out yet. tap anyone so no one can tell.'));
+        }
         body.appendChild(picks(list, g.my_pick, p => mafiaAct(p, out, ask), lock));
       }
       if (me.role === 'mafia') { body.appendChild(chatBox); renderMafiaChat(); }
