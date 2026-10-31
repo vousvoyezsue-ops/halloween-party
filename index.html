@@ -275,6 +275,9 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .msend{display:flex;gap:8px;margin-top:10px}
 .msend .in{flex:1;min-width:0}
 .msend .btn{margin:0;width:auto;padding:10px 16px}
+.graveyard{margin-top:18px;padding:18px 20px;border:2px dashed #f1ebe366;border-radius:4px;background:#ffffff0d}
+.graveyard h3{margin:0;font-family:var(--hand);font-weight:400;font-size:38px;line-height:.9}
+.graveyard > p{margin:8px 0 0;font-size:15px;line-height:1.55}
 .mhost{margin-top:22px;padding-top:16px;border-top:2px dashed #f1ebe344}
 .mhost .btn{margin:10px 10px 0 0}
 .hostctl{margin-top:24px;border-top:2px dashed #2f2a2e44;padding-top:18px}
@@ -1181,24 +1184,33 @@ const ROLE = {
   citizen: ['you are a citizen', 'at night, tap anyone so no one can tell who\'s acting. by day, find the mafia.'],
 };
 let mafiaOpen = false, mafiaKey = '', skippedDay = 0;
-/* mafia-only chat: one persistent box, so typing survives refreshes */
-const chatBox = el('div', 'mchat'), chatLog = el('ul', 'mlog'), chatForm = el('form', 'msend'), chatIn = el('input', 'in'), chatBtn = el('button', 'btn', 'send');
-chatIn.maxLength = 200; chatIn.placeholder = 'whisper to your team…'; chatIn.setAttribute('aria-label', 'Message to your team'); chatIn.autocomplete = 'off'; chatBtn.type = 'submit';
-chatForm.append(chatIn, chatBtn); chatBox.append(el('h4', '', 'mafia only · nobody else can see this'), chatLog, chatForm);
-chatForm.addEventListener('submit', async e => {
-  e.preventDefault(); const body = chatIn.value.trim(); if (!body) return;
-  chatBtn.disabled = true;
-  try { await rpc('mafia_say', {p_token: token, p_body: body}); chatIn.value = ''; chatIn.placeholder = 'whisper to your team…'; loadParty(); }
-  catch (err) { chatIn.placeholder = 'couldn\'t send, try again'; }
-  chatBtn.disabled = false; chatIn.focus();
-});
-function renderMafiaChat(){
-  const c = (party.mafia && party.mafia.chat) || [];
-  chatLog.textContent = '';
-  if (!c.length) chatLog.appendChild(el('li', 'none', 'no messages yet.'));
-  c.forEach(m => { const li = el('li', m.mine ? 'mine' : ''); if (!m.mine) li.appendChild(el('small', '', m.name)); li.appendChild(document.createTextNode(m.body)); chatLog.appendChild(li); });
-  chatLog.scrollTop = chatLog.scrollHeight;
+/* chats live in persistent boxes, so typing survives refreshes */
+function makeChat(title, placeholder, fn){
+  const box = el('div', 'mchat'), log = el('ul', 'mlog'), form = el('form', 'msend'), inp = el('input', 'in'), btn = el('button', 'btn', 'send');
+  inp.maxLength = 200; inp.placeholder = placeholder; inp.setAttribute('aria-label', placeholder); inp.autocomplete = 'off'; btn.type = 'submit';
+  form.append(inp, btn); box.append(el('h4', '', title), log, form);
+  form.addEventListener('submit', async e => {
+    e.preventDefault(); const body = inp.value.trim(); if (!body) return;
+    btn.disabled = true;
+    try { await rpc(fn, {p_token: token, p_body: body}); inp.value = ''; inp.placeholder = placeholder; loadParty(); }
+    catch (err) { inp.placeholder = 'couldn\'t send, try again'; }
+    btn.disabled = false; inp.focus();
+  });
+  return {box, render(list){
+    list = list || []; log.textContent = '';
+    if (!list.length) log.appendChild(el('li', 'none', 'no messages yet.'));
+    list.forEach(m => { const li = el('li', m.mine ? 'mine' : ''); if (!m.mine) li.appendChild(el('small', '', m.name)); li.appendChild(document.createTextNode(m.body)); log.appendChild(li); });
+    log.scrollTop = log.scrollHeight;
+  }};
 }
+const mchat = makeChat('mafia only · nobody else can see this', 'whisper to your team…', 'mafia_say');
+const gchat = makeChat('ghost chat · only the dead and the medium', 'talk to the other side…', 'ghost_say');
+function renderMafiaChat(){ mchat.render(party.mafia && party.mafia.chat); }
+
+/* the graveyard: the dead (and the medium) talk among themselves */
+const ghostBox = el('div', 'graveyard');
+ghostBox.append(el('h3', '', 'the graveyard'), el('p', '', 'you\'re out, but not gone. talk with the other ghosts here. the medium can hear you too.'));
+function renderGhost(){ const gh = party.mafia && party.mafia.ghost; if (gh) gchat.render(gh.chat); }
 const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="#e8dc93" stroke="none"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/></svg>';
 function renderMafiaNarr(){
   const g = party.mafia, box = $('#mafiaNarr'); box.textContent = '';
@@ -1299,7 +1311,8 @@ function renderMafiaMe(){
         }
         body.appendChild(picks(list, g.my_pick, p => mafiaAct(p, out, ask), lock));
       }
-      if (me.role === 'mafia') { body.appendChild(chatBox); renderMafiaChat(); }
+      if (me.role === 'mafia') { body.appendChild(mchat.box); renderMafiaChat(); }
+      if (me.role === 'medium' && me.alive && g.ghost) { body.appendChild(gchat.box); renderGhost(); }
       pk.appendChild(body);
     }
     box.appendChild(pk);
@@ -1311,7 +1324,7 @@ function renderMafiaMe(){
       box.append(el('p', 'legend', 'vote someone out'), vp);
       box.lastChild.previousSibling.style.marginTop = '22px';
     }
-    if (!me.alive && !mafiaOpen) box.appendChild(el('p', 'empty', 'you\'re out. watch quietly ♡'));
+    if (!me.alive && g.ghost) { ghostBox.appendChild(gchat.box); box.appendChild(ghostBox); renderGhost(); }
   }
   box.appendChild(out);
   if (hk) {
@@ -1342,7 +1355,8 @@ function renderParty(force){
    [renderAwards, [p.state, p.me, p.players, p.my_awards, p.award_voters, p.awards]],
    [renderLiar, [p.me && p.me.id, p.liar, hk]],
    [renderMafiaNarr, [p.mafia && [p.mafia.phase, p.mafia.day, p.mafia.announcement, p.mafia.winner, p.mafia.players, p.mafia.acted, p.mafia.alive, p.mafia.tally, p.mafia.last_tally]]],
-   [renderMafiaMe, [p.mafia && Object.assign({}, p.mafia, {acted: 0, tally: null, last_tally: null, chat: null}), hk, mafiaOpen, skippedDay]],
+   [renderMafiaMe, [p.mafia && Object.assign({}, p.mafia, {acted: 0, tally: null, last_tally: null, chat: null, ghost: !!p.mafia.ghost}), hk, mafiaOpen, skippedDay]],
+   [renderGhost, [p.mafia && p.mafia.ghost]],
    [renderMafiaChat, [p.mafia && p.mafia.chat]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
   .forEach(([fn, data]) => { const s = JSON.stringify(data); if (force || drawn[fn.name] !== s) { drawn[fn.name] = s; fn(); } });
 }
