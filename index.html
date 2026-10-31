@@ -1204,7 +1204,7 @@ function renderMafiaNarr(){
   if (!g) return;
   const night = g.phase === 'night', day = g.phase === 'day', n = el('div', 'narr' + (night ? ' is-night' : ''));
   const top = el('div', 'narr-top'); top.innerHTML = night ? A.moon() : day ? SUN : '';
-  top.appendChild(document.createTextNode({lobby: 'the narrator', night: `night ${g.day}`, day: `day ${g.day}`, over: 'the end'}[g.phase]));
+  top.appendChild(document.createTextNode({lobby: 'the narrator', night: `night ${g.day}`, day: g.day ? `day ${g.day}` : 'first day', over: 'the end'}[g.phase]));
   const head = {lobby: 'gather round.', night: g.announcement || 'night falls.', day: g.announcement || 'morning.', over: g.winner === 'town' ? 'the town wins!' : 'the mafia wins!'}[g.phase];
   const how = {lobby: `${g.players.length} in so far · the host deals when everyone's ready.`, night: `${g.announcement ? 'now night falls. ' : ''}phones close, faces calm. everyone taps someone in secret.`,
                day: 'talk it over, then vote below.', over: g.announcement || ''}[g.phase];
@@ -1223,7 +1223,7 @@ function renderMafiaNarr(){
   if (gone.length && g.phase !== 'over') {
     const o = el('ul', 'outs');
     gone.sort((a, b) => (a.out_day || 0) * 2 + (a.out === 'vote') - ((b.out_day || 0) * 2 + (b.out === 'vote'))).forEach(p => {
-      const li = el('li'), how = p.out === 'vote' ? `voted out, day ${p.out_day}` : p.out === 'mafia' ? `mafia, night ${p.out_day}` : 'out';
+      const li = el('li'), how = p.out === 'vote' ? `voted out, ${p.out_day ? 'day ' + p.out_day : 'first day'}` : p.out === 'mafia' ? `mafia, night ${p.out_day}` : 'out';
       li.append(el('i', '', p.out === 'vote' ? '🗳' : '🔪'), el('span'));
       li.lastChild.append(el('b', '', p.name), document.createTextNode(' '), el('small', '', how));
       o.appendChild(li);
