@@ -1071,20 +1071,20 @@ function renderLiar(){
       w.addEventListener('click', () => { wordOpen = !wordOpen; renderLiar(); });
       box.appendChild(w);
     }
-  } else box.appendChild(el('p', 'empty', 'no round yet. anyone can start one.'));
+  } else box.appendChild(el('p', 'empty', hostKey() ? 'no round yet. start one when everyone\'s ready.' : 'no round yet. the host will start one.'));
   const row = el('div'), out = el('span', 'status'); out.setAttribute('role', 'status');
   const go = el('button', 'btn', g ? 'new round' : 'start a round'); go.type = 'button';
   const act = async (a, msg) => {
     if (a === 'new' && g && !g.revealed && !confirm('start a new round? the current word will be lost.')) return;
     go.disabled = true; say(out, msg);
-    try { await rpc('party_liar', {p_token: token, p_action: a}); say(out, ''); if (a === 'reveal') burst(50); else chime(84); loadParty(); }
-    catch (err) { say(out, /three/.test(err.message || '') ? 'need at least 3 people checked in' : 'couldn\'t do that, try again', true); }
+    try { await rpc('party_liar', {p_token: token, p_action: a, p_key: hostKey()}); say(out, ''); if (a === 'reveal') burst(50); else chime(84); loadParty(); }
+    catch (err) { say(out, /three/.test(err.message || '') ? 'need at least 3 people checked in' : err.code === '28P01' ? 'only the host can start a round' : 'couldn\'t do that, try again', true); }
     go.disabled = false;
   };
   go.addEventListener('click', () => act('new', 'shuffling words…'));
-  row.appendChild(go);
+  if (hostKey()) row.appendChild(go);
   if (g && !g.revealed) {
-    const rv = el('button', 'btn ghosty', 'reveal the liar'); rv.type = 'button'; rv.style.marginLeft = '10px';
+    const rv = el('button', 'btn ghosty', 'reveal the liar'); rv.type = 'button'; if (hostKey()) rv.style.marginLeft = '10px';
     rv.addEventListener('click', () => { if (confirm('reveal the liar and the word to everyone?')) act('reveal', 'unmasking…'); });
     row.appendChild(rv);
   }
@@ -1124,7 +1124,7 @@ function renderParty(force){
   // only redraw a section when its data changed, so half-made picks survive the 15s refresh
   [[renderMystery, [p.state, p.me, p.players, p.my_accuse, p.accuse_count, p.ghost, p.accuse_tally]],
    [renderAwards, [p.state, p.me, p.players, p.my_awards, p.award_voters, p.awards]],
-   [renderLiar, [p.me && p.me.id, p.liar]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
+   [renderLiar, [p.me && p.me.id, p.liar, hk]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
   .forEach(([fn, data]) => { const s = JSON.stringify(data); if (force || drawn[fn.name] !== s) { drawn[fn.name] = s; fn(); } });
 }
 async function loadParty(){
