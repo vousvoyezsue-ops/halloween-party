@@ -1156,11 +1156,13 @@ function renderMafiaNarr(){
   const n = el('div', 'narr'), alive = g.alive, done = `${g.acted} of ${alive} done`;
   const [label, line, sub] = {
     lobby: ['the narrator', 'gather round.', `${g.players.length} in so far · the host deals when everyone's ready`],
-    night: [`night ${g.day}`, 'night falls. phones close, faces calm.', `everyone taps someone in secret · ${done}`],
+    night: [`night ${g.day}`, g.announcement || 'night falls. phones close, faces calm.', `${g.announcement ? 'now night falls. ' : ''}everyone taps someone in secret · ${done}`],
     day: [`day ${g.day}`, g.announcement || 'morning.', `discuss, then vote below · ${g.acted} of ${alive} voted`],
     over: ['the end', g.winner === 'town' ? 'the town wins!' : 'the mafia wins!', g.announcement || ''],
   }[g.phase];
   n.append(el('span', '', label), el('b', '', line), el('small', '', sub));
+  const gone = g.players.filter(p => !p.alive).map(p => p.name);
+  if (gone.length && g.phase !== 'over') n.appendChild(el('small', '', `out so far: ${gone.join(', ')}`)).style.marginTop = '8px';
   box.appendChild(n);
 }
 function picks(players, chosen, onPick, disabled){
