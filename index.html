@@ -228,6 +228,25 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
 .songs small{display:block;font-size:13px;opacity:.75;margin-top:2px}
 .songs li.played b{text-decoration:line-through;opacity:.5}
 .songs .tick{border:0;background:none;cursor:pointer;font-size:13px;text-decoration:underline;text-underline-offset:3px;padding:6px}
+.narr{margin-top:20px;padding:20px;border-radius:4px;background:#ffffff14;border:1.5px solid #f1ebe344;text-align:center}
+.narr span{display:block;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.narr b{display:block;font-family:var(--hand);font-weight:400;font-size:clamp(34px,8vw,44px);line-height:.95;margin:10px 0 6px}
+.narr small{display:block;font-size:15px;line-height:1.5;opacity:.9}
+.peek{margin-top:18px;border:2px dashed #f1ebe366;border-radius:4px;background:#ffffff0d}
+.peek > button{width:100%;border:0;background:none;color:inherit;padding:16px;cursor:pointer;font-family:var(--hand);font-size:30px;line-height:1}
+.peek > button small{display:block;font-family:var(--type);font-size:14px;opacity:.85;margin-top:6px}
+.peek .body{padding:0 20px 20px}
+.peek h3{margin:0;font-family:var(--hand);font-weight:400;font-size:40px;line-height:.9}
+.peek p{margin:8px 0 0;font-size:15px;line-height:1.55}
+.picks{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.picks button{padding:10px 16px;border-radius:999px;border:2px solid #f1ebe399;background:#ffffff1c;color:var(--cream);font-size:15px;cursor:pointer}
+.picks button[aria-pressed="true"]{background:var(--cream);color:var(--ink);border-color:var(--cream)}
+.picks button:disabled{opacity:.45;cursor:default}
+.roles{list-style:none;margin:14px 0 0;padding:0}
+.roles li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1.5px dashed #f1ebe333;font-size:15px}
+.roles li.out span:first-child{text-decoration:line-through;opacity:.6}
+.mhost{margin-top:22px;padding-top:16px;border-top:2px dashed #f1ebe344}
+.mhost .btn{margin:10px 10px 0 0}
 .hostctl{margin-top:24px;border-top:2px dashed #2f2a2e44;padding-top:18px}
 .hostctl .btn{margin:10px 10px 0 0}
 
@@ -254,7 +273,7 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
   .top{padding-inline:12px}
   .tabs{width:calc(100% - 24px)}
   .tabs{padding:0 4px;gap:0}
-  .tabs button{flex:1 1 auto;font-size:22px;padding:13px 4px 9px}
+  .tabs button{flex:1 1 auto;font-size:20px;padding:13px 3px 9px}
   .after{padding-inline:12px}
   .patch{padding:26px 20px}
   .art-patch{min-height:120px}
@@ -404,6 +423,12 @@ button:focus-visible,.in:focus-visible{outline:3px dashed var(--red);outline-off
       <h2 class="p-title">the liar game</h2>
       <p class="p-sub">everyone gets the word but one · find the liar</p>
       <div id="liar"></div>
+    </div>
+    <div class="patch dark" style="--c:var(--mocha-d);grid-area:mafia" id="mafiaPatch">
+      <h2 class="p-title">mafia</h2>
+      <p class="p-sub">the site is the narrator · everyone plays, hosts too</p>
+      <div id="mafiaNarr"></div>
+      <div id="mafiaMe"></div>
     </div>
     <div class="patch" style="--c:var(--rose);grid-area:songs" id="songsPatch">
       <h2 class="p-title">song requests</h2>
@@ -1117,6 +1142,111 @@ $('#songForm').addEventListener('submit', async e => {
   btn.disabled = false;
 });
 
+/* mafia: the page narrates, phones carry the secrets */
+const ROLE = {
+  mafia: ['you are mafia', 'each night, pick someone to take. agree with your partner quietly.'],
+  doctor: ['you are the doctor', 'each night, pick someone to protect. you can protect yourself.'],
+  police: ['you are the police', 'each night, investigate one person. you\'ll learn if they\'re mafia.'],
+  citizen: ['you are a citizen', 'at night, tap anyone so no one can tell who\'s acting. by day, find the mafia.'],
+};
+let mafiaOpen = false, mafiaKey = '';
+function renderMafiaNarr(){
+  const g = party.mafia, box = $('#mafiaNarr'); box.textContent = '';
+  if (!g) return;
+  const n = el('div', 'narr'), alive = g.alive, done = `${g.acted} of ${alive} done`;
+  const [label, line, sub] = {
+    lobby: ['the narrator', 'gather round.', `${g.players.length} in so far · the host deals when everyone's ready`],
+    night: [`night ${g.day}`, 'night falls. phones close, faces calm.', `everyone taps someone in secret · ${done}`],
+    day: [`day ${g.day}`, g.announcement || 'morning.', `discuss, then vote below · ${g.acted} of ${alive} voted`],
+    over: ['the end', g.winner === 'town' ? 'the town wins!' : 'the mafia wins!', g.announcement || ''],
+  }[g.phase];
+  n.append(el('span', '', label), el('b', '', line), el('small', '', sub));
+  box.appendChild(n);
+}
+function picks(players, chosen, onPick, disabled){
+  const box = el('div', 'picks');
+  players.forEach(p => {
+    const b = el('button', '', p.name); b.type = 'button'; b.setAttribute('aria-pressed', p.id === chosen); b.disabled = !!disabled;
+    b.addEventListener('click', () => onPick(p, b)); box.appendChild(b);
+  });
+  return box;
+}
+async function mafiaAct(p, out, confirmText){
+  if (confirmText && !confirm(confirmText)) return;
+  say(out, '…');
+  try { const r = await rpc('mafia_act', {p_token: token, p_target: p.id}); say(out, r ? `${r.name} is ${r.is_mafia ? 'MAFIA' : 'not mafia'}` : `you picked ${p.name}`); chime(80); loadParty(); }
+  catch (err) { say(out, /already/.test(err.message || '') ? 'you already investigated tonight' : 'couldn\'t send, try again', true); }
+}
+function renderMafiaMe(){
+  const g = party.mafia, box = $('#mafiaMe'), me = g && g.me, hk = hostKey();
+  box.textContent = '';
+  if (!g) return;
+  const out = el('span', 'status'); out.setAttribute('role', 'status');
+  const alive = g.players.filter(p => p.alive);
+  if (g.phase === 'lobby') {
+    if (me) box.appendChild(el('p', 'empty', 'you\'re in ✓ wait for the deal'));
+    else {
+      const b = el('button', 'btn', 'I\'m in'); b.type = 'button';
+      b.addEventListener('click', async () => {
+        const name = (party.me && party.me.name) || $('#joinName').value.trim() || prompt('your name?');
+        if (!name) return;
+        b.disabled = true;
+        try { await rpc('mafia_join', {p_token: token, p_name: name}); loadParty(); } catch (e) { say(out, 'couldn\'t join, try again', true); b.disabled = false; }
+      });
+      box.appendChild(b);
+    }
+  } else if (g.phase === 'over') {
+    const ul = el('ul', 'roles');
+    (g.roles || []).forEach(r => { const li = el('li', r.alive ? '' : 'out'); li.append(el('span', '', r.name), el('span', '', r.role)); ul.appendChild(li); });
+    box.appendChild(ul);
+  } else if (!me) {
+    box.appendChild(el('p', 'empty', 'a game is on. you can join the next one.'));
+  } else {
+    const [title, how] = ROLE[me.role] || ['', ''];
+    const pk = el('div', 'peek'), t = el('button'); t.type = 'button';
+    t.append(document.createTextNode(mafiaOpen ? 'hide my role' : 'my secret role'), el('small', '', mafiaOpen ? 'tap to cover it again' : 'tap to peek · keep it from your neighbours'));
+    t.addEventListener('click', () => { mafiaOpen = !mafiaOpen; renderMafiaMe(); });
+    pk.appendChild(t);
+    if (mafiaOpen) {
+      const body = el('div', 'body'); body.append(el('h3', '', title), el('p', '', how));
+      if (me.role === 'mafia' && g.team) body.appendChild(el('p', '', `your team: ${g.team.join(', ')}`));
+      if (me.role === 'police' && g.checks) g.checks.forEach(c => body.appendChild(el('p', '', `night ${c.day}: ${c.name} is ${c.is_mafia ? 'MAFIA' : 'not mafia'}`)));
+      if (!me.alive) body.appendChild(el('p', '', 'you\'re out. watch quietly, no hints ♡'));
+      else if (g.phase === 'night') {
+        let list = alive, lock = false, ask = null;
+        if (me.role === 'mafia') { const team = g.team || []; list = alive.filter(p => !team.includes(p.name)); if (g.team_pick) body.appendChild(el('p', '', `team's pick: ${g.team_pick}`)); }
+        if (me.role === 'police') { list = alive.filter(p => p.id !== me.id); lock = g.my_pick != null; ask = 'investigate this person? you only get one each night.'; }
+        body.appendChild(picks(list, g.my_pick, p => mafiaAct(p, out, ask), lock));
+      }
+      pk.appendChild(body);
+    }
+    box.appendChild(pk);
+    if (me.alive && g.phase === 'day') {
+      box.append(el('p', 'legend', 'vote someone out'), picks(alive.filter(p => p.id !== me.id), g.my_pick, p => mafiaAct(p, out)));
+      box.lastChild.previousSibling.style.marginTop = '22px';
+    }
+    if (!me.alive && !mafiaOpen) box.appendChild(el('p', 'empty', 'you\'re out. watch quietly ♡'));
+  }
+  box.appendChild(out);
+  if (hk) {
+    const h = el('div', 'mhost'), hs = el('span', 'status');
+    h.appendChild(el('p', 'legend', 'host'));
+    const act = (label, a, ask) => { const b = el('button', 'btn', label); b.type = 'button';
+      b.addEventListener('click', async () => {
+        if (ask && !confirm(typeof ask === 'function' ? ask() : ask)) return;
+        b.disabled = true; say(hs, '…');
+        try { await rpc('mafia_host', {p_key: hk, p_action: a}); say(hs, ''); if (a !== 'reset') burst(30); loadParty(); }
+        catch (err) { say(hs, /six/.test(err.message || '') ? 'need at least 6 players' : 'couldn\'t do that, try again', true); }
+        b.disabled = false;
+      }); h.appendChild(b); };
+    if (g.phase === 'lobby') act(`deal roles (${g.players.length})`, 'deal', `deal roles to ${g.players.length} players?`);
+    if (g.phase === 'night') act('morning ☀', 'morning', () => `${party.mafia.acted} of ${party.mafia.alive} have tapped. bring the morning?`);
+    if (g.phase === 'day') act('end the vote', 'endvote', () => `${party.mafia.acted} of ${party.mafia.alive} have voted. close the vote?`);
+    if (g.phase !== 'lobby') act('new game', 'reset', 'start a fresh game? everyone joins again.');
+    h.appendChild(hs); box.appendChild(h);
+  }
+}
+
 const drawn = {};
 function renderParty(force){
   if (party.me) showFortune(party.me.fortune, false);
@@ -1124,12 +1254,17 @@ function renderParty(force){
   // only redraw a section when its data changed, so half-made picks survive the 15s refresh
   [[renderMystery, [p.state, p.me, p.players, p.my_accuse, p.accuse_count, p.ghost, p.accuse_tally]],
    [renderAwards, [p.state, p.me, p.players, p.my_awards, p.award_voters, p.awards]],
-   [renderLiar, [p.me && p.me.id, p.liar, hk]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
+   [renderLiar, [p.me && p.me.id, p.liar, hk]],
+   [renderMafiaNarr, [p.mafia && [p.mafia.phase, p.mafia.day, p.mafia.announcement, p.mafia.winner, p.mafia.players.length, p.mafia.acted, p.mafia.alive]]],
+   [renderMafiaMe, [p.mafia && Object.assign({}, p.mafia, {acted: 0}), hk, mafiaOpen]], [renderSongs, [p.songs, hk]], [renderAlbum, [p.photos, hk]]]
   .forEach(([fn, data]) => { const s = JSON.stringify(data); if (force || drawn[fn.name] !== s) { drawn[fn.name] = s; fn(); } });
 }
 async function loadParty(){
-  try { party = await rpc('party_board', {p_token: token}); renderParty(); } catch (e) { /* keep last view */ }
-  clearTimeout(partyTimer); partyTimer = setTimeout(function again(){ if (!document.hidden) loadParty(); else partyTimer = setTimeout(again, 15000); }, 15000);
+  try {
+    const [b, m] = await Promise.all([rpc('party_board', {p_token: token}), rpc('mafia_board', {p_token: token}).catch(() => null)]);
+    party = b; party.mafia = m; renderParty();
+  } catch (e) { /* keep last view */ }
+  clearTimeout(partyTimer); partyTimer = setTimeout(function again(){ if (!document.hidden) loadParty(); else partyTimer = setTimeout(again, 8000); }, 8000);
 }
 
 /* hosts */
@@ -1178,7 +1313,7 @@ $('#hostForm').addEventListener('submit', async e => {
 /* tabs: one section at a time */
 const TABS = {
   invite: [['rsvp', 'rsvp', ['#rsvpPatch']], ['theme', 'theme', ['#votePatch']], ['plan', 'the night', ['#planPatch']], ['note', 'a note', ['#notePatch']]],
-  party: [['tonight', 'tonight', ['#nightTop', '#fortPatch']], ['ghost', 'ghost', ['#mystPatch']], ['games', 'games', ['#spinPatch', '#liarPatch']],
+  party: [['tonight', 'tonight', ['#nightTop', '#fortPatch']], ['ghost', 'ghost', ['#mystPatch']], ['games', 'games', ['#spinPatch', '#liarPatch']], ['mafia', 'mafia', ['#mafiaPatch']],
           ['awards', 'awards', ['#awardPatch']], ['songs', 'songs', ['#songsPatch']], ['album', 'album', ['#albumPatch']]],
   album: [['album', 'album', ['#albumPatch']], ['results', 'results', ['#awardPatch', '#mystPatch']]],
 }[PHASE];
